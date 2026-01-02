@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Coupon Compute Tester</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .item { margin-bottom: 10px; }
+    button { margin-top: 20px; padding: 10px 16px; }
+    pre { background: #f4f4f4; padding: 10px; }
+  </style>
+</head>
+<body style="background-color: darkgray;">
+
+  <h2>Cart Items</h2>
+
+  <div class="item">
+    <input type="checkbox" id="item1" checked />
+    <label for="item1">
+      Laptop ($1000) — tags: electronics, computer
+    </label>
+  </div>
+
+  <div class="item">
+    <input type="checkbox" id="item2" checked />
+    <label for="item2">
+      Headphones ($200) — tags: electronics, audio
+    </label>
+  </div>
+
+  <div class="item">
+    <input type="checkbox" id="item3" />
+    <label for="item3">
+      Coffee Mug ($50) — tags: kitchen
+    </label>
+  </div>
+
+  <button onclick="sendCart()">Send Cart to /compute</button>
+
+  <h3>Response</h3>
+  <pre id="response"></pre>
+
+  <script>
+    function sendCart() {
+      const items = [];
+
+      if (document.getElementById("item1").checked) {
+        items.push({
+          ItemID: "ITEM1",
+          Name: "Laptop",
+          Price: 1000,
+          Quantity: 1,
+          Tags: ["electronics", "computer"]
+        });
+      }
+
+      if (document.getElementById("item2").checked) {
+        items.push({
+          ItemID: "ITEM2",
+          Name: "Headphones",
+          Price: 200,
+          Quantity: 1,
+          Tags: ["electronics", "audio"]
+        });
+      }
+
+      if (document.getElementById("item3").checked) {
+        items.push({
+          ItemID: "ITEM3",
+          Name: "Coffee Mug",
+          Price: 50,
+          Quantity: 1,
+          Tags: ["kitchen"]
+        });
+      }
+
+      const payload = {
+        cart: {
+          Item: items
+        },
+        coupons: [
+          {
+            Coupon_ID: "CART10",
+            Org_ID: "ORG1",
+            Desc: "10% off cart",
+            Type: "percentage",
+            DiscountAmt: 10,
+            MinAmt: 500,
+            MaxDiscountAmt: 300,
+            Level: "cart_level",
+            Tags: []
+          },
+          {
+            Coupon_ID: "ELEC20",
+            Org_ID: "ORG1",
+            Desc: "$20 off electronics",
+            Type: "fixed",
+            DiscountAmt: 20,
+            MinAmt: 200,
+            MaxDiscountAmt: 20,
+            Level: "tag_level",
+            Tags: ["electronics"]
+          }
+        ]
+      };
+
+      fetch("http://localhost:8080/compute", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(payload)
+      })
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById("response").textContent =
+            JSON.stringify(data, null, 2);
+        })
+        .catch(err => {
+          document.getElementById("response").textContent =
+            "Error: " + err;
+        });
+    }
+  </script>
+
+</body>
+</html>
