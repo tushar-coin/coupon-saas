@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Merchant Page</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+  </head>
+  <body>
+    <h2>🛒 Cart</h2>
+
+    <ul>
+      <li>Laptop – ₹100 × 1</li>
+    </ul>
+
+    <button id="applyCoupons">Apply Coupons</button>
+
+    <!-- Merchant defines cart + coupons -->
+    <!-- <script>
+      window.__CART_DATA__ = {
+        cart: {
+          Item: [
+            {
+              ItemID: "ITEM1",
+              Name: "Laptop",
+              Price: 100,
+              Quantity: 1,
+              Tags: ["electronics"]
+            }
+          ]
+        },
+        coupons: [
+          {
+            Coupon_ID: "COUPON1",
+            Org_ID: "ORG1",
+            Desc: "10% off cart",
+            Type: "percentage",
+            DiscountAmt: 10,
+            MinAmt: 50,
+            MaxDiscountAmt: 100,
+            Level: "cart_level",
+            Tags: []
+          },
+          {
+            Coupon_ID: "COUPON2",
+            Org_ID: "ORG1",
+            Desc: "₹20 off electronics",
+            Type: "fixed",
+            DiscountAmt: 20,
+            MinAmt: 50,
+            MaxDiscountAmt: 50,
+            Level: "tag_level",
+            Tags: ["electronics"]
+          }
+        ]
+      };
+
+      document.getElementById("applyCoupons").onclick = () => {
+        window.dispatchEvent(new Event("APPLY_COUPONS"));
+      };
+    </script> -->
+
+    <!-- Embedded widget -->
+     <script>
+  window.__CART_DATA__ = {
+        cart: {
+          Item: [
+            {
+              ItemID: "ITEM1",
+              Name: "Laptop",
+              Price: 100,
+              Quantity: 1,
+              Tags: ["electronics"]
+            }
+          ]
+        },
+        coupons: [
+          {
+            Coupon_ID: "COUPON1",
+            Org_ID: "ORG1",
+            Desc: "10% off cart",
+            Type: "percentage",
+            DiscountAmt: 10,
+            MinAmt: 50,
+            MaxDiscountAmt: 100,
+            Level: "cart_level",
+            Tags: []
+          },
+          {
+            Coupon_ID: "COUPON2",
+            Org_ID: "ORG1",
+            Desc: "₹20 off electronics",
+            Type: "fixed",
+            DiscountAmt: 20,
+            MinAmt: 50,
+            MaxDiscountAmt: 50,
+            Level: "tag_level",
+            Tags: ["electronics"]
+          }
+        ]
+      };
+
+  document.getElementById("applyCoupons").onclick = () => {
+    window.dispatchEvent(new Event("APPLY_COUPONS"));
+  };
+</script>
+     </script>
+    <script
+      src="http://localhost:8080/widget.js"
+      data-merchant-id="merchant123"
+      data-theme="dark"
+    ></script>
+  </body>
+</html>
