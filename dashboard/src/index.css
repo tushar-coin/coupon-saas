@@ -1,0 +1,174 @@
+:root {
+  /* Brand Colors (Premium Blue/Indigo) */
+  --primary: #4F46E5;
+  /* Indigo 600 */
+  --primary-hover: #4338ca;
+  --primary-light: #EEF2FF;
+  /* Indigo 50 */
+
+  /* Text Colors */
+  --text-main: #111827;
+  /* Gray 900 */
+  --text-muted: #6B7280;
+  /* Gray 500 */
+  --text-light: #9CA3AF;
+  /* Gray 400 */
+
+  /* Backgrounds */
+  --bg-main: #F9FAFB;
+  /* Gray 50 */
+  --bg-card: #FFFFFF;
+  --bg-glass: rgba(255, 255, 255, 0.7);
+  --bg-hover: #F3F4F6;
+  /* Gray 100 */
+
+  /* Borders */
+  --border: #E5E7EB;
+  /* Gray 200 */
+
+  /* Functional Colors */
+  --success: #10B981;
+  --success-bg: #D1FAE5;
+  --warning: #F59E0B;
+  --warning-bg: #FEF3C7;
+  --danger: #EF4444;
+  --danger-bg: #FEE2E2;
+
+  /* Shadows (Premium Defused) */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-glass: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+
+  /* Spacing & Radius */
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+
+  /* Typography */
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* Subtle Backgrounds for Icons/Badges */
+  --bg-blue-subtle: #DBEAFE;
+  --bg-green-subtle: #D1FAE5;
+  --bg-purple-subtle: #F3E8FF;
+  --bg-orange-subtle: #FFEDD5;
+
+  /* Auth Background */
+  --bg-auth: linear-gradient(135deg, #EEF2FF 0%, #E0E7FF 100%);
+}
+
+[data-theme='dark'] {
+  /* Brand Colors */
+  --primary: #6366f1;
+  /* Indigo 500 - Slightly lighter for dark mode contrast */
+  --primary-hover: #818cf8;
+  /* Indigo 400 */
+  --primary-light: rgba(79, 70, 229, 0.15);
+  /* Translucent indigo */
+
+  /* Text Colors */
+  --text-main: #f1f5f9;
+  /* Slate 100 */
+  --text-muted: #94a3b8;
+  /* Slate 400 */
+  --text-light: #64748b;
+  /* Slate 500 */
+
+  /* Backgrounds */
+  --bg-main: #0f172a;
+  /* Slate 900 */
+  --bg-card: #1e293b;
+  /* Slate 800 */
+  --bg-glass: rgba(30, 41, 59, 0.8);
+  --bg-hover: #334155;
+  /* Slate 700 */
+
+  /* Borders */
+  --border: #334155;
+  /* Slate 700 */
+
+  /* Functional Colors (Backgrounds become translucent) */
+  --success-bg: rgba(16, 185, 129, 0.15);
+  --warning-bg: rgba(245, 158, 11, 0.15);
+  --danger-bg: rgba(239, 68, 68, 0.15);
+
+  /* Subtle Backgrounds */
+  --bg-blue-subtle: rgba(59, 130, 246, 0.15);
+  --bg-green-subtle: rgba(16, 185, 129, 0.15);
+  --bg-purple-subtle: rgba(139, 92, 246, 0.15);
+  --bg-orange-subtle: rgba(249, 115, 22, 0.15);
+
+  /* Auth Background */
+  --bg-auth: var(--bg-main);
+
+  /* Shadows */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Base Utilities */
+.glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  transition: all 0.2s;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--bg-card);
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px var(--primary-light);
+}

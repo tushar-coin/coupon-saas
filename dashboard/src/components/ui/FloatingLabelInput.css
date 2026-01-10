@@ -1,0 +1,102 @@
+.floating-input-wrapper {
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.floating-input-container {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    transition: all 0.2s;
+}
+
+.floating-input-container.focused {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.floating-input-container.error {
+    border-color: var(--danger);
+}
+
+.floating-input-container.error.focused {
+    box-shadow: 0 0 0 3px var(--danger-bg);
+}
+
+.input-icon {
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.floating-input-container.focused .input-icon {
+    color: var(--primary);
+}
+
+.floating-input-container.error .input-icon {
+    color: var(--danger);
+}
+
+.input-field-wrapper {
+    position: relative;
+    flex: 1;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+}
+
+.floating-input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 1rem;
+    color: var(--text-main);
+    padding: 0;
+}
+
+.floating-input::placeholder {
+    opacity: 0;
+}
+
+.floating-label {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 1rem;
+    pointer-events: none;
+    transform-origin: left center;
+    white-space: nowrap;
+}
+
+.required-indicator {
+    color: var(--danger);
+}
+
+/* Error message */
+.input-error {
+    margin-top: 0.375rem;
+    font-size: 0.875rem;
+    color: var(--danger);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+/* Autofill styling */
+.floating-input:-webkit-autofill,
+.floating-input:-webkit-autofill:hover,
+.floating-input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px var(--bg-card) inset;
+    -webkit-text-fill-color: var(--text-main);
+}

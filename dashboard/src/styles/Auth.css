@@ -1,0 +1,95 @@
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-auth);
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 440px;
+    /* Slightly wider */
+    padding: 3rem;
+    /* More breathing room */
+    border-radius: var(--radius-xl);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    /* More premium shadow */
+    background: var(--bg-card);
+}
+
+.auth-title {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: var(--text-main);
+    text-align: center;
+    margin-bottom: 0.5rem;
+}
+
+.auth-subtitle {
+    color: var(--text-muted);
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-main);
+}
+
+.auth-footer {
+    margin-top: 2rem;
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+.auth-footer a {
+    color: var(--primary);
+    font-weight: 500;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+    color: var(--primary-hover);
+}
+
+/* Auth Button Specific Overrides */
+.auth-form .btn-primary {
+    width: 100%;
+    /* Match width of inputs */
+    max-width: none;
+    /* Reset max-width if needed */
+    margin-top: 1.5rem;
+    background: linear-gradient(135deg, var(--primary) 0%, var(--primary-hover) 100%);
+    box-shadow: 0 4px 6px rgba(79, 70, 229, 0.2);
+    border-radius: var(--radius-md);
+    /* Match standard input radius */
+    padding: 0.75rem 1rem;
+    letter-spacing: 0.5px;
+    display: flex;
+    /* Ensure flex behavior for centering */
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.auth-form .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 12px rgba(79, 70, 229, 0.3);
+}

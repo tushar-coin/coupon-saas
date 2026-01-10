@@ -1,0 +1,316 @@
+.create-coupon-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.create-header {
+    margin-bottom: 2rem;
+}
+
+.back-link {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}
+
+.back-link:hover {
+    color: var(--primary);
+}
+
+@keyframes safeClick {
+    0% {
+        pointer-events: none;
+        opacity: 0.7;
+    }
+
+    70% {
+        pointer-events: none;
+        opacity: 0.7;
+    }
+
+    100% {
+        pointer-events: auto;
+        opacity: 1;
+    }
+}
+
+.btn-safe-click {
+    animation: safeClick 1.5s ease-out forwards;
+}
+
+.steps-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.step-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--text-light);
+    font-weight: 500;
+}
+
+.step-item.active {
+    color: var(--primary);
+}
+
+.step-number {
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    border: 2px solid var(--text-light);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.step-item.active .step-number {
+    border-color: var(--primary);
+    background: var(--primary-light);
+}
+
+.step-line {
+    width: 3rem;
+    height: 2px;
+    background-color: var(--border);
+    margin: 0 1rem;
+}
+
+.form-card {
+    padding: 2.5rem;
+}
+
+.form-step {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.form-row {
+    display: flex;
+    gap: 1.5rem;
+}
+
+.form-row .form-group {
+    flex: 1;
+}
+
+.code-input {
+    font-family: monospace;
+    font-size: 1.25rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+}
+
+.helper-text {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+/* Radio Cards (Visibility) */
+.visibility-monitor {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.radio-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.radio-card:hover {
+    border-color: var(--primary);
+    background: var(--bg-main);
+}
+
+.radio-card input {
+    margin-top: 0.375rem;
+}
+
+.radio-content {
+    flex: 1;
+}
+
+.radio-title {
+    display: block;
+    font-weight: 600;
+    color: var(--text-main);
+    margin-bottom: 0.25rem;
+}
+
+.radio-content p {
+    margin: 0;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+}
+
+/* Actions */
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 2.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+}
+
+.form-actions button {
+    min-width: 120px;
+    justify-content: center;
+}
+
+/* Floating Input Mimic for Select */
+.floating-input-mimic {
+    position: relative;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding-top: 5px;
+    /* Space for the label to sit nicely */
+    transition: all 0.2s;
+    height: 58px;
+    /* Match standard floating input height */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.floating-input-mimic:focus-within {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.floating-input-mimic .custom-select-container {
+    width: 100%;
+    min-width: 0;
+    /* Prevent overflow */
+}
+
+/* Remove default border of Select since Wrapper has it */
+.floating-input-mimic .custom-select-trigger {
+    border: none;
+    background: transparent;
+    padding: 0.75rem 1rem;
+    height: 100%;
+}
+
+.floating-mimic-label {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    /* Start centered */
+    transform: translateY(-50%) translateY(-14px) scale(0.85);
+    /* Simulate the floated state */
+    transform-origin: left center;
+    color: var(--text-muted);
+    font-size: 1rem;
+    /* Base size, scaled down by transform */
+    pointer-events: none;
+    z-index: 10;
+}
+
+/* Adjust Select trigger to align text properly below label */
+.floating-input-mimic .custom-select-trigger>div:first-child,
+.floating-input-mimic .datetime-trigger .trigger-content {
+    margin-top: 8px;
+    /* Slightly reduced to optimize vertical centering */
+}
+
+/* Date Input Customization */
+.custom-date-input {
+    width: 100%;
+    height: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    font-size: 1rem;
+    color: var(--text-main);
+    padding: 1.25rem 1rem 0 3rem;
+    /* Top padding pushes text down, Left padding clears icon */
+    font-family: inherit;
+    cursor: text;
+}
+
+/* Remove default icon visibility but maximize clickable area */
+.custom-date-input::-webkit-calendar-picker-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: auto;
+    height: auto;
+    color: transparent;
+    background: transparent;
+    cursor: pointer;
+    opacity: 0;
+    /* Hide visual but keep clickable */
+}
+
+/* Ensure placeholder look for empty date if needed, though datetime-local is tricky */
+
+
+/* Icon Position */
+.input-icon-mimic {
+    position: absolute;
+    left: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Focused State for Icon */
+.floating-input-mimic:focus-within .input-icon-mimic {
+    color: var(--primary);
+}
+
+/* Error State for Mimic */
+.floating-input-mimic.error-border {
+    border-color: var(--danger);
+}
+
+.error-text-sm {
+    color: var(--danger);
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+/* Label adjustments when icon is present */
+.floating-mimic-label.with-icon {
+    left: 3rem;
+    /* Align with text start */
+}

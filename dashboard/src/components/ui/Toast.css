@@ -1,0 +1,106 @@
+.toast-container {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    z-index: 9999;
+    pointer-events: none;
+    /* Allow clicking through container */
+}
+
+.toast-item {
+    pointer-events: auto;
+    /* Re-enable clicks on toasts */
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-xl);
+    min-width: 300px;
+    max-width: 400px;
+    overflow: hidden;
+    backdrop-filter: blur(10px);
+}
+
+.toast-item.success {
+    border-color: var(--success);
+    /* background: linear-gradient(to right, rgba(16, 185, 129, 0.1), transparent); */
+    border-left: 4px solid var(--success);
+}
+
+.toast-item.error {
+    border-color: var(--danger);
+    /* background: linear-gradient(to right, rgba(239, 68, 68, 0.1), transparent); */
+    border-left: 4px solid var(--danger);
+}
+
+.toast-item.info {
+    border-color: var(--primary);
+    /* background: linear-gradient(to right, rgba(79, 70, 229, 0.1), transparent); */
+    border-left: 4px solid var(--primary);
+}
+
+.toast-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.toast-item.success .toast-icon {
+    color: var(--success);
+}
+
+.toast-item.error .toast-icon {
+    color: var(--danger);
+}
+
+.toast-item.info .toast-icon {
+    color: var(--primary);
+}
+
+.toast-message {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    color: var(--text-main);
+    flex: 1;
+    line-height: 1.4;
+}
+
+.toast-close {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.toast-close:hover {
+    color: var(--text-main);
+    background: var(--bg-main);
+}
+
+@media (max-width: 640px) {
+    .toast-container {
+        bottom: 1rem;
+        left: 1rem;
+        right: 1rem;
+        align-items: center;
+    }
+
+    .toast-item {
+        width: 100%;
+        min-width: 0;
+    }
+}
