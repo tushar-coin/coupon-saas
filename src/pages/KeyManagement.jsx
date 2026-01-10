@@ -1,0 +1,1 @@
+export default () => <h1>Key Management</h1>

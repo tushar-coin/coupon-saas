@@ -1,0 +1,1 @@
+export default () => <h1>Add Users (Admin)</h1>
