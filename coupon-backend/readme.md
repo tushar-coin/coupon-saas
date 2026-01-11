@@ -20,3 +20,16 @@ openssl req \
 ````
 
 do cd to certs/ before generting the certs
+
+Before running the service create a keys.json file that would store the json keys data
+
+to start the server, cd to coupon-backend
+run `go run main.go` to start the server
+
+for making the request to generate endpoint
+
+```
+curl -k -X POST https://localhost:8443/generate
+```
+
+this would return the API key generated which can later be used to call the hello method.
