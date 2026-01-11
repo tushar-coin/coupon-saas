@@ -6,6 +6,7 @@ import useCouponStore from "../store/useCouponStore";
 import CountUp from "../components/ui/CountUp";
 import Sparkline from "../components/ui/Sparkline";
 import Badge from "../components/ui/Badge";
+import Select from "../components/ui/Select";
 import "../styles/Dashboard.css";
 
 // Enhanced Stats Card Component with animations and sparkline
@@ -170,18 +171,20 @@ export default function Dashboard() {
           
           {/* Controls for Expiring View */}
           {activeView === "expiring" && (
-            <div className="filter-controls">
-              <Filter size={16} className="text-muted"/>
-              <select 
-                className="filter-select-inline"
-                value={expiryRange}
-                onChange={(e) => setExpiryRange(e.target.value)}
-              >
-                <option value="7">Next 7 Days</option>
-                <option value="30">Next 30 Days</option>
-                <option value="90">Next 3 Months</option>
-              </select>
-            </div>
+              <div className="filter-controls">
+                <div style={{ width: '180px' }}>
+                  <Select 
+                    options={[
+                      { value: "7", label: "Next 7 Days" },
+                      { value: "30", label: "Next 30 Days" },
+                      { value: "90", label: "Next 3 Months" }
+                    ]}
+                    value={expiryRange}
+                    onChange={(val) => setExpiryRange(val)}
+                    icon={Filter}
+                  />
+                </div>
+              </div>
           )}
         </div>
 
