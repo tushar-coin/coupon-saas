@@ -2,23 +2,15 @@ package storage
 
 import (
 	"encoding/json"
+	"example/coupon_computation/coupon-backend/entity"
+	"fmt"
 	"os"
 	"sync"
 )
 
-type KeyRecord struct {
-	ID         string `json:"id"`
-	Ciphertext string `json:"ciphertext"`
-}
-
-type Store struct {
-	mu   sync.Mutex
-	Keys []KeyRecord `json:"keys"`
-}
-
 var (
-	keyStore = &Store{Keys: []KeyRecord{}}
-	keyFile  string
+	keyFile   string
+	fileMutex sync.RWMutex
 )
 
 func InitStore(file string) error {
@@ -26,62 +18,55 @@ func InitStore(file string) error {
 
 	f, err := os.Open(file)
 	if err != nil {
-		if os.IsNotExist(err) {
-			keyStore.mu.Lock()
-			defer keyStore.mu.Unlock()
-			return persistLocked()
-		}
 		return err
 	}
 	defer f.Close()
-
-	keyStore.mu.Lock()
-	defer keyStore.mu.Unlock()
-	return json.NewDecoder(f).Decode(keyStore)
+	return nil
 }
 
-// persistLocked MUST be called with keyStore.mu already locked
-func persistLocked() error {
-	temp := keyFile + ".tmp"
+func ReadKeyStore(filePath string) (*entity.KeyRecord, error) {
+	var result entity.KeyRecord
 
-	f, err := os.Create(temp)
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return nil, err
+	}
+
+	if !json.Valid(data) {
+		return nil, fmt.Errorf("invalid json")
+	}
+
+	if err := json.Unmarshal(data, &result); err != nil {
+		return nil, err
+	}
+
+	return &result, nil
+}
+
+func SaveEncryptedKey(record entity.KeyRecord) error {
+	// Read existing file
+	data, err := os.ReadFile(keyFile)
 	if err != nil {
 		return err
 	}
 
-	if err := json.NewEncoder(f).Encode(keyStore); err != nil {
-		f.Close()
-		_ = os.Remove(temp)
-		return err
-	}
-
-	if err := f.Close(); err != nil {
-		return err
-	}
-
-	return os.Rename(temp, keyFile)
-}
-
-func SaveEncryptedKey(id, ciphertext string) error {
-	keyStore.mu.Lock()
-	defer keyStore.mu.Unlock()
-
-	keyStore.Keys = append(keyStore.Keys, KeyRecord{
-		ID:         id,
-		Ciphertext: ciphertext,
-	})
-
-	return persistLocked()
-}
-
-func FindEncryptedKey(id string) (string, bool) {
-	keyStore.mu.Lock()
-	defer keyStore.mu.Unlock()
-
-	for _, rec := range keyStore.Keys {
-		if rec.ID == id {
-			return rec.Ciphertext, true
+	// Unmarshal into slice
+	var records []entity.KeyRecord
+	if len(data) != 0 {
+		if err := json.Unmarshal(data, &records); err != nil {
+			return err
 		}
 	}
-	return "", false
+
+	// Append new record
+	records = append(records, record)
+
+	// Marshal back to JSON
+	updatedData, err := json.MarshalIndent(records, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	// Write back to file
+	return os.WriteFile(keyFile, updatedData, 0644)
 }

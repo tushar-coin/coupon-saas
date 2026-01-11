@@ -5,6 +5,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"example/coupon_computation/coupon-backend/crypto"
+	"example/coupon_computation/coupon-backend/entity"
 	"example/coupon_computation/coupon-backend/storage"
 	"fmt"
 	"os"
@@ -31,24 +32,17 @@ func GenerateAPIKeyLogic() (string, error) {
 	fmt.Println("API key encrypted successfully.")
 
 	fmt.Println("saving the API key...")
-	if err := storage.SaveEncryptedKey(apiKey, encrypted); err != nil {
+	if err := storage.SaveEncryptedKey(entity.KeyRecord{
+		Ciphertext: encrypted,
+		// TODO: pass the org values here.
+		OrgDetails: entity.OrgDetails{
+			ID:   "org-123",
+			Name: "Example Organization",
+		},
+	}); err != nil {
 		return "", err
 	}
 	fmt.Println("API key saved successfully.")
 
 	return apiKey, nil
-}
-
-func GetAPIKey(id string) (string, error) {
-	masterKeyB64 := os.Getenv("MASTER_KEY")
-	if masterKeyB64 == "" {
-		return "", errors.New("MASTER_KEY not set")
-	}
-	masterKey, _ := hex.DecodeString(masterKeyB64)
-
-	enc, ok := storage.FindEncryptedKey(id)
-	if !ok {
-		return "", errors.New("not found")
-	}
-	return crypto.Decrypt(masterKey, enc)
 }
