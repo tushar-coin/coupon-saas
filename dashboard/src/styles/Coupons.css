@@ -11,13 +11,15 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 1rem;
     flex-shrink: 0;
-    /* Don't shrink toolbar */
+    flex-wrap: wrap;
 }
 
 .search-wrapper {
     position: relative;
     width: 300px;
+    flex-shrink: 0;
 }
 
 .search-icon {
@@ -34,7 +36,11 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     background: var(--bg-card);
+    color: var(--text-main);
+    font-size: 0.875rem;
     transition: all 0.2s;
+    height: 42px;
+    box-sizing: border-box;
 }
 
 .search-input:focus {
@@ -45,7 +51,19 @@
 
 .actions-wrapper {
     display: flex;
-    gap: 1rem;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.actions-wrapper .custom-select-trigger {
+    height: 42px;
+    box-sizing: border-box;
+}
+
+.actions-wrapper .btn {
+    height: 42px;
+    box-sizing: border-box;
+    white-space: nowrap;
 }
 
 .btn-secondary {
@@ -67,16 +85,8 @@
     border-color: var(--text-light);
 }
 
-.btn-primary {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    text-decoration: none;
-}
-
 .coupons-table-wrapper {
     flex: 1;
-    /* Fill remaining space */
     overflow-x: auto;
     overflow-y: auto;
     padding: 0;

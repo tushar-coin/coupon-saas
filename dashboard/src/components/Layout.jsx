@@ -1,28 +1,36 @@
 import { useState } from "react";
-import { Outlet } from "react-router-dom";
-import { Copy, Home, LogOut, Settings, LayoutDashboard, ChevronLeft, Moon, Sun } from "lucide-react";
+import { Outlet, useNavigate } from "react-router-dom";
+import { Copy, Home, LogOut, Settings, LayoutDashboard, ChevronLeft, Moon, Sun, Users } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import "../styles/Layout.css";
 import useThemeStore from "../store/useThemeStore";
+import useAuthStore from "../store/useAuthStore";
 
 const SIDEBAR_ITEMS = [
   { icon: Home, label: "Dashboard", path: "/dashboard" },
   { icon: LayoutDashboard, label: "Coupons", path: "/coupons" },
+  { icon: Users, label: "Team", path: "/team" },
   { icon: Settings, label: "Settings", path: "/settings" },
 ];
 
 export default function Layout() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [hoveredItem, setHoveredItem] = useState(null);
   const { theme, toggleTheme } = useThemeStore();
+  const { user, logout } = useAuthStore(); // Get User & Logout
 
-  // Apply theme to document
-  // In a real app, this might be better in a top-level provider, but Layout works for this scope
+  // Apply theme
   if (typeof document !== 'undefined') {
       document.documentElement.setAttribute('data-theme', theme);
   }
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
     <div className="layout">
@@ -96,7 +104,6 @@ export default function Layout() {
                     )}
                   </AnimatePresence>
                   
-                  {/* Active indicator */}
                   {isActive && (
                     <motion.div
                       className="active-indicator-line"
@@ -107,8 +114,6 @@ export default function Layout() {
                     />
                   )}
                 </Link>
-                
-                {/* Tooltip removed per user request */}
               </div>
             );
           })}
@@ -134,7 +139,8 @@ export default function Layout() {
               )}
             </AnimatePresence>
           </button>
-          <button className="btn-logout">
+          
+          <button className="btn-logout" onClick={handleLogout}>
             <LogOut size={20} />
             <AnimatePresence>
               {!isCollapsed && (
@@ -158,18 +164,18 @@ export default function Layout() {
             <div>
                  <h2 className="page-title">
                     {location.pathname === "/dashboard" ? "Overview" : 
-                     location.pathname.includes("coupons") ? "Coupon Management" : "Settings"}
+                     location.pathname.includes("coupons") ? "Coupon Management" : 
+                     location.pathname.includes("team") ? "Team Management" : "Settings"}
                  </h2>
-                 <p className="user-welcome">Welcome back, Merchant</p>
+                 <p className="user-welcome">Welcome back, {user?.org_name || "Merchant"}</p>
             </div>
             <div className="flex items-center gap-4">
                 <div className="user-avatar">
-                    M
+                    {user?.org_name ? user.org_name.charAt(0).toUpperCase() : "M"}
                 </div>
             </div>
         </header>
         
-        {/* Page Transition Wrapper */}
         <motion.div
             key={location.pathname}
             initial={{ opacity: 0, y: 10 }}

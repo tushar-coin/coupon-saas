@@ -1,0 +1,26 @@
+[
+  {
+    "id": "3cc86af3-3db2-43ce-9e58-ff3ba566adc2",
+    "org_id": "01945ff4-e863-4a99-8a26-f5176eaa92b0",
+    "org_name": "BurgerKing",
+    "email": "rajaninvest597@gmail.com",
+    "role": "member",
+    "token": "37755a5670704d412130896f356408c30ae52add7a2decc1336e56a240a58802",
+    "invited_by": "02b6ffe0-0c8f-4aa4-8df0-9241bbd288c5",
+    "expires_at": "2026-01-22T15:35:14.8551058+05:30",
+    "accepted_at": "2026-01-15T15:36:43.7034494+05:30",
+    "created_at": "2026-01-15T15:35:14.8551058+05:30"
+  },
+  {
+    "id": "4be1d690-d867-44fc-b62a-221e9a68e975",
+    "org_id": "01945ff4-e863-4a99-8a26-f5176eaa92b0",
+    "org_name": "BurgerKing",
+    "email": "tusharBairi597@gmail.com",
+    "role": "admin",
+    "token": "c1113ba78059ea9eadf6dcf51bbfaba6960741beefb92ab2e9fc309ad985c0f0",
+    "invited_by": "02b6ffe0-0c8f-4aa4-8df0-9241bbd288c5",
+    "expires_at": "2026-01-22T15:46:50.3143972+05:30",
+    "accepted_at": "2026-01-15T15:47:47.5784192+05:30",
+    "created_at": "2026-01-15T15:46:50.3143972+05:30"
+  }
+]

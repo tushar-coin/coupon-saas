@@ -1,86 +1,152 @@
 # CouponFlow Dashboard
 
-A modern, responsive, and aesthetically premium SaaS dashboard for managing coupons and discounts. Built with React, Vite, and Framer Motion.
+A modern React dashboard for managing coupons, teams, and organizations.
 
-![Dashboard Preview](https://via.placeholder.com/800x450?text=Dashboard+Preview)
+## Tech Stack
 
-## 🚀 Features
+- **React 19** - UI framework
+- **Vite 7** - Build tool & dev server
+- **React Router 7** - Routing
+- **Zustand** - State management
+- **Framer Motion** - Animations
+- **Lucide React** - Icons
+- **Recharts** - Charts & analytics
+- **Zod** - Form validation
 
--   **Interactive Dashboard**: Real-time stats with sparkline trends and animated counters.
--   **Coupon Management**: Create, edit, and track coupons with detailed filtering.
--   **Smart Wizard**: Step-by-step coupon creation wizard with validation (Zod).
--   **Dark Mode**: A polished, "Slate" based dark theme with smooth transitions.
--   **Modern UI**: Glassmorphism effects, fluid animations (Framer Motion), and responsive design.
-
-## 🛠️ Tech Stack
-
--   **Framework**: [React](https://react.dev/) + [Vite](https://vitejs.dev/)
--   **Styling**: Pure CSS (Variables for theming) + Lucide Icons
--   **State Management**: [Zustand](https://github.com/pmndrs/zustand) (with persistence)
--   **Animations**: [Framer Motion](https://www.framer.com/motion/)
--   **Forms & Validation**: React Hook Form / Standard Controlled Inputs + [Zod](https://zod.dev/)
--   **Charts**: Custom Sparklines + Recharts (optional future integration)
--   **Utilities**: date-fns, canvas-confetti
-
-## 📦 Installation & Setup
-
-Follow these steps to run the project locally.
+## Quick Start
 
 ### Prerequisites
 
--   **Node.js**: Version 18.0.0 or higher recommended.
--   **npm**: Comes with Node.js.
+- Node.js 18+ installed
+- npm or yarn
+- Backend server running at `http://localhost:8081`
 
-### Steps
-
-1.  **Clone the Repository**
-    ```bash
-    git clone https://github.com/your-username/coupon-saas.git
-    cd coupon-saas/dashboard
-    ```
-
-2.  **Install Dependencies**
-    ```bash
-    npm install
-    ```
-
-3.  **Run Development Server**
-    ```bash
-    npm run dev
-    ```
-    The application will startup at `http://localhost:5173`.
-
-## 🏗️ Build for Production
-
-To create a production-ready build:
+### Setup
 
 ```bash
-npm run build
+# Clone the repository
+git clone <repository-url>
+cd coupon-saas/dashboard
+
+# Install dependencies
+npm install
+
+# Start development server
+npm run dev
 ```
 
-To preview the build locally:
+The app runs at **http://localhost:5173**
+
+## Project Structure
+
+```
+dashboard/
+├── public/
+│   └── vite.svg
+├── src/
+│   ├── components/          # Reusable UI components
+│   │   ├── ui/              # Base components (Button, Badge, etc.)
+│   │   ├── Layout.jsx       # Main app layout with sidebar
+│   │   ├── Toast.jsx        # Toast notifications
+│   │   ├── ConfirmModal.jsx # Confirmation dialogs
+│   │   └── CustomSelect.jsx # Custom dropdown
+│   ├── pages/               # Route pages
+│   │   ├── Dashboard.jsx    # Analytics dashboard
+│   │   ├── Coupons.jsx      # Coupon list
+│   │   ├── CreateCoupon.jsx # 3-step coupon wizard
+│   │   ├── Team.jsx         # Team management
+│   │   ├── Settings.jsx     # User settings
+│   │   ├── Login.jsx        # Authentication
+│   │   ├── Register.jsx     # New account
+│   │   ├── ForgotPassword.jsx
+│   │   ├── ResetPassword.jsx
+│   │   ├── VerifyEmail.jsx
+│   │   └── AcceptInvitation.jsx
+│   ├── store/               # Zustand stores
+│   │   ├── useAuthStore.js  # Auth state & actions
+│   │   ├── useCouponStore.js# Coupon CRUD
+│   │   └── useToastStore.js # Notifications
+│   ├── styles/              # CSS files
+│   ├── App.jsx              # Route definitions
+│   └── main.jsx             # Entry point
+├── index.html
+├── package.json
+└── vite.config.js
+```
+
+## Features
+
+### Authentication
+- Login with email, password, org name
+- Registration with email verification
+- Password reset flow
+- Account lockout protection
+
+### Coupon Management
+- Create coupons with 3-step wizard
+- Percentage or fixed discounts
+- Usage limits & expiry dates
+- Public/private visibility
+- Real-time validation
+
+### Team Management
+- Invite team members via email
+- Role-based permissions (Owner/Admin/Member)
+- Accept invitations with password setup
+- Remove members & update roles
+
+### UI/UX
+- Dark mode support
+- Responsive design
+- Toast notifications
+- Animated transitions
+- Custom form components
+
+## Scripts
 
 ```bash
-npm run preview
+npm run dev      # Start dev server
+npm run build    # Production build
+npm run preview  # Preview production build
+npm run lint     # Run ESLint
 ```
 
-## 📂 Project Structure
+## API Configuration
 
-```
-src/
-├── components/   # Reusable UI components (Button, Badge, etc.)
-├── data/         # Mock data for coupons
-├── pages/        # Main route pages (Dashboard, Coupons, etc.)
-├── store/        # Zustand stores for state management
-├── styles/       # CSS modules and enhanced styling
-├── App.jsx       # Main application entry
-└── main.jsx      # React DOM root
+The API URL is configured in stores:
+
+```javascript
+// src/store/useAuthStore.js
+const API_URL = 'http://localhost:8081/api/v1';
 ```
 
-## 🎨 Theming
+For production, update to your deployed backend URL.
 
-All colors are defined in `src/index.css` using CSS variables. The app supports system-preference based dark mode detection and manual toggling.
+## State Management
 
----
+Using Zustand for lightweight state:
 
-**Happy Coding!**
+```javascript
+// Access auth state
+import useAuthStore from './store/useAuthStore';
+const { user, isAuthenticated, login, logout } = useAuthStore();
+
+// Access coupons
+import useCouponStore from './store/useCouponStore';
+const { coupons, addCoupon, deleteCoupon } = useCouponStore();
+```
+
+## Protected Routes
+
+Routes under `/` require authentication:
+
+```jsx
+<Route element={<ProtectedRoute />}>
+  <Route path="/" element={<Layout />}>
+    <Route path="dashboard" element={<Dashboard />} />
+    <Route path="coupons" element={<Coupons />} />
+    <Route path="team" element={<Team />} />
+    <Route path="settings" element={<Settings />} />
+  </Route>
+</Route>
+```

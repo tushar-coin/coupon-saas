@@ -205,28 +205,31 @@ export default function CreateCoupon() {
   const prevStep = () => setStep((s) => Math.max(s - 1, 1));
 
   // FINAL SUBMIT
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e?.preventDefault();
     if (step !== 3) return;
     
-    // Final check? usually Step 3 is just visibility, safe to assume valid
-    
-    if (isEditMode) {
-      updateCoupon(id, formData);
-      toastRef.current.addToast("Coupon updated successfully!", "success");
-    } else {
-      addCoupon(formData);
-      toastRef.current.addToast("Coupon created successfully!", "success");
-      
-      confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
-        colors: ['#4F46E5', '#7C3AED', '#EC4899', '#F59E0B']
-      });
-    }
+    try {
+      if (isEditMode) {
+        updateCoupon(id, formData);
+        toastRef.current.addToast("Coupon updated successfully!", "success");
+      } else {
+        await addCoupon(formData);
+        toastRef.current.addToast("Coupon created successfully!", "success");
+        
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+          colors: ['#4F46E5', '#7C3AED', '#EC4899', '#F59E0B']
+        });
+      }
 
-    setTimeout(() => navigate("/coupons"), 1500);
+      setTimeout(() => navigate("/coupons"), 1500);
+    } catch (error) {
+      // Show the actual error from the API
+      toastRef.current.addToast(error.message || "Failed to create coupon", "error");
+    }
   };
 
   return (
