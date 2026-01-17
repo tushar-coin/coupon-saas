@@ -14,6 +14,7 @@ type Cart struct {
 
 type ComputeResult struct {
 	CouponID       string  `json:"coupon_id"`
+	CouponCode     string  `json:"coupon_code"`
 	DiscountAmount float64 `json:"discount_amount"`
 	Message        string  `json:"message"`
 	Success        bool    `json:"success"`

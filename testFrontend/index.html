@@ -2,111 +2,279 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <title>Merchant Page</title>
+    <title>Merchant Page - Coupon Tester</title>
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+      * { box-sizing: border-box; }
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 20px;
+        background: #1a1a2e;
+        color: #eee;
+      }
+      h2, h3 { color: #00d4ff; margin-top: 24px; }
+      .section {
+        background: #2a2a4a;
+        padding: 16px;
+        border-radius: 8px;
+        margin-bottom: 16px;
+      }
+      .input-row {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+      }
+      .input-group {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .input-group label {
+        font-size: 12px;
+        color: #888;
+      }
+      .input-group input {
+        padding: 8px;
+        border-radius: 4px;
+        border: 1px solid #444;
+        background: #0f0f1a;
+        color: #fff;
+        font-size: 14px;
+        width: 120px;
+      }
+      .input-group input.wide {
+        width: 200px;
+      }
+      button {
+        padding: 10px 20px;
+        border-radius: 6px;
+        border: none;
+        background: #00d4ff;
+        color: #000;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #00b8e6;
+      }
+      button.secondary {
+        background: #444;
+        color: #fff;
+      }
+      button.secondary:hover {
+        background: #555;
+      }
+      button.danger {
+        background: #ff4444;
+        color: #fff;
+        padding: 4px 8px;
+        font-size: 12px;
+      }
+      .cart-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: #0f0f1a;
+        padding: 10px;
+        border-radius: 6px;
+        margin-bottom: 8px;
+      }
+      .cart-item-info {
+        flex: 1;
+      }
+      .cart-item-name {
+        font-weight: bold;
+        color: #00ff88;
+      }
+      .cart-item-details {
+        font-size: 12px;
+        color: #888;
+      }
+      .tags {
+        display: flex;
+        gap: 4px;
+        margin-top: 4px;
+      }
+      .tag {
+        background: #00d4ff33;
+        color: #00d4ff;
+        padding: 2px 6px;
+        border-radius: 4px;
+        font-size: 10px;
+      }
+      .empty-cart {
+        color: #888;
+        font-style: italic;
+      }
+      #cartJson {
+        background: #0f0f1a;
+        padding: 12px;
+        border-radius: 6px;
+        font-family: monospace;
+        font-size: 11px;
+        max-height: 200px;
+        overflow: auto;
+        white-space: pre-wrap;
+        word-break: break-word;
+        margin-top: 12px;
+      }
+    </style>
   </head>
   <body>
-    <h2>🛒 Cart</h2>
+    <h2>🛒 Coupon Tester</h2>
 
-    <ul>
-      <li>Laptop – ₹100 × 1</li>
-    </ul>
+    <!-- Add Item Section -->
+    <div class="section">
+      <h3>➕ Add Cart Item</h3>
+      <div class="input-row">
+        <div class="input-group">
+          <label>Item ID</label>
+          <input type="text" id="itemId" value="ITEM1" />
+        </div>
+        <div class="input-group">
+          <label>Name</label>
+          <input type="text" id="itemName" value="Laptop" class="wide" />
+        </div>
+        <div class="input-group">
+          <label>Price (₹)</label>
+          <input type="number" id="itemPrice" value="100" />
+        </div>
+        <div class="input-group">
+          <label>Quantity</label>
+          <input type="number" id="itemQty" value="1" />
+        </div>
+        <div class="input-group">
+          <label>Tags (comma-separated)</label>
+          <input type="text" id="itemTags" value="electronics" class="wide" />
+        </div>
+      </div>
+      <button onclick="addItem()">Add Item</button>
+      <button class="secondary" onclick="clearCart()">Clear Cart</button>
+    </div>
 
-    <button id="applyCoupons">Apply Coupons</button>
+    <!-- Current Cart Section -->
+    <div class="section">
+      <h3>📦 Current Cart</h3>
+      <div id="cartItems">
+        <p class="empty-cart">No items in cart</p>
+      </div>
+      <details>
+        <summary style="cursor: pointer; color: #888; font-size: 12px;">View JSON Payload</summary>
+        <div id="cartJson"></div>
+      </details>
+    </div>
 
-    <!-- Merchant defines cart + coupons -->
-    <!-- <script>
-      window.__CART_DATA__ = {
-        cart: {
-          Item: [
-            {
-              ItemID: "ITEM1",
-              Name: "Laptop",
-              Price: 100,
-              Quantity: 1,
-              Tags: ["electronics"]
-            }
-          ]
-        },
-        coupons: [
-          {
-            Coupon_ID: "COUPON1",
-            Org_ID: "ORG1",
-            Desc: "10% off cart",
-            Type: "percentage",
-            DiscountAmt: 10,
-            MinAmt: 50,
-            MaxDiscountAmt: 100,
-            Level: "cart_level",
-            Tags: []
-          },
-          {
-            Coupon_ID: "COUPON2",
-            Org_ID: "ORG1",
-            Desc: "₹20 off electronics",
-            Type: "fixed",
-            DiscountAmt: 20,
-            MinAmt: 50,
-            MaxDiscountAmt: 50,
-            Level: "tag_level",
-            Tags: ["electronics"]
+    <!-- Apply Coupons Section -->
+    <div class="section">
+      <h3>🎟️ Apply Coupons</h3>
+      <div class="input-row">
+        <div class="input-group">
+          <label>Organization Name</label>
+          <input type="text" id="orgNameInput" value="MuscleBlaze" class="wide" />
+        </div>
+      </div>
+      <button id="applyCoupons">Apply Coupons</button>
+    </div>
+
+    <script>
+      // Initialize cart
+      let cartItems = [];
+
+      function updateCartDisplay() {
+        const container = document.getElementById("cartItems");
+        const jsonContainer = document.getElementById("cartJson");
+        
+        if (cartItems.length === 0) {
+          container.innerHTML = '<p class="empty-cart">No items in cart</p>';
+        } else {
+          container.innerHTML = cartItems.map((item, idx) => `
+            <div class="cart-item">
+              <div class="cart-item-info">
+                <span class="cart-item-name">${item.name}</span>
+                <div class="cart-item-details">
+                  ID: ${item.item_id} | ₹${item.price} × ${item.quantity}
+                </div>
+                <div class="tags">
+                  ${item.tags.map(t => `<span class="tag">${t}</span>`).join('')}
+                </div>
+              </div>
+              <button class="danger" onclick="removeItem(${idx})">✕</button>
+            </div>
+          `).join('');
+        }
+
+        // Update global cart data
+        window.__CART_DATA__ = {
+          cart: {
+            items: cartItems
           }
-        ]
-      };
+        };
 
+        jsonContainer.textContent = JSON.stringify(window.__CART_DATA__, null, 2);
+      }
+
+      function addItem() {
+        const item = {
+          item_id: document.getElementById("itemId").value.trim(),
+          name: document.getElementById("itemName").value.trim(),
+          price: parseFloat(document.getElementById("itemPrice").value) || 0,
+          quantity: parseInt(document.getElementById("itemQty").value) || 1,
+          tags: document.getElementById("itemTags").value.split(',').map(t => t.trim()).filter(t => t)
+        };
+
+        if (!item.item_id || !item.name) {
+          alert("Item ID and Name are required");
+          return;
+        }
+
+        cartItems.push(item);
+        updateCartDisplay();
+      }
+
+      function removeItem(idx) {
+        cartItems.splice(idx, 1);
+        updateCartDisplay();
+      }
+
+      function clearCart() {
+        cartItems = [];
+        updateCartDisplay();
+      }
+
+      // Initialize with one sample item
+      cartItems = [
+        {
+          item_id: "ITEM1",
+          name: "Laptop",
+          price: 100,
+          quantity: 1,
+          tags: ["electronics"]
+        }
+      ];
+      updateCartDisplay();
+
+      // Apply coupons button handler
       document.getElementById("applyCoupons").onclick = () => {
+        const orgName = document.getElementById("orgNameInput").value.trim();
+        if (!orgName) {
+          alert("Please enter an Organization Name");
+          return;
+        }
+        if (cartItems.length === 0) {
+          alert("Please add at least one item to the cart");
+          return;
+        }
+        window.__ORG_NAME__ = orgName;
         window.dispatchEvent(new Event("APPLY_COUPONS"));
       };
-    </script> -->
+    </script>
 
-    <!-- Embedded widget -->
-     <script>
-  window.__CART_DATA__ = {
-        cart: {
-          Item: [
-            {
-              ItemID: "ITEM1",
-              Name: "Laptop",
-              Price: 100,
-              Quantity: 1,
-              Tags: ["electronics"]
-            }
-          ]
-        },
-        coupons: [
-          {
-            Coupon_ID: "COUPON1",
-            Org_ID: "ORG1",
-            Desc: "10% off cart",
-            Type: "percentage",
-            DiscountAmt: 10,
-            MinAmt: 50,
-            MaxDiscountAmt: 100,
-            Level: "cart_level",
-            Tags: []
-          },
-          {
-            Coupon_ID: "COUPON2",
-            Org_ID: "ORG1",
-            Desc: "₹20 off electronics",
-            Type: "fixed",
-            DiscountAmt: 20,
-            MinAmt: 50,
-            MaxDiscountAmt: 50,
-            Level: "tag_level",
-            Tags: ["electronics"]
-          }
-        ]
-      };
-
-  document.getElementById("applyCoupons").onclick = () => {
-    window.dispatchEvent(new Event("APPLY_COUPONS"));
-  };
-</script>
-     </script>
+    <!-- Load the widget -->
     <script
       src="http://localhost:8080/widget.js"
-      data-merchant-id="merchant123"
       data-theme="dark"
     ></script>
   </body>

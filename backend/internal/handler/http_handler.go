@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"log/slog"
 	"net/http"
 	"time"
 
@@ -51,13 +52,17 @@ func (h *Handler) ComputeDiscount(w http.ResponseWriter, r *http.Request) {
 	type Request struct {
 		Cart       domain.Cart `json:"cart"`
 		CouponCode string      `json:"coupon_code"`
+		MerchantID string      `json:"merchant_id"`
 	}
 
 	var req Request
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		slog.Error("Invalid request body", "error", err)
 		http.Error(w, "Invalid request body", http.StatusBadRequest)
 		return
 	}
+
+	slog.Info("Received compute request", "code", req.CouponCode, "cart_items", len(req.Cart.Items))
 
 	result, err := h.svc.ComputeDiscount(req.Cart, req.CouponCode)
 	if err != nil {
@@ -68,6 +73,32 @@ func (h *Handler) ComputeDiscount(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(result)
+}
+
+// POST /api/v1/public/apply-coupons
+func (h *Handler) ApplyCoupons(w http.ResponseWriter, r *http.Request) {
+	type Request struct {
+		Cart       domain.Cart `json:"cart"`
+		MerchantID string      `json:"merchant_id"`
+	}
+
+	var req Request
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		slog.Error("Invalid request body", "error", err)
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	slog.Info("Received application request", "merchant", req.MerchantID, "cart_items", len(req.Cart.Items))
+
+	results, err := h.svc.EvaluateAllCoupons(req.Cart, req.MerchantID)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(results)
 }
 
 // POST /api/v1/dashboard/coupons

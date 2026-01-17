@@ -21,12 +21,13 @@ function Widget() {
   );
 
   const config = {
-    merchantId: current?.getAttribute("data-merchant-id") || "dev",
     theme: current?.getAttribute("data-theme") || "light",
   };
 
   const [offers, setOffers] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState(null);
+  const [currentOrg, setCurrentOrg] = React.useState("");
 
   React.useEffect(() => {
     function applyCoupons() {
@@ -34,22 +35,49 @@ function Widget() {
 
       if (!window.__CART_DATA__) {
         console.error("[WIDGET] window.__CART_DATA__ missing");
+        setError("Cart data is missing");
         return;
       }
 
-      setLoading(true);
+      const orgName = window.__ORG_NAME__ || "";
+      if (!orgName) {
+        setError("Organization name is required");
+        return;
+      }
 
-      // simulate backend result for now
-      fetch("http://localhost:8081/compute", {
+      setCurrentOrg(orgName);
+      setLoading(true);
+      setError(null);
+      setOffers(null);
+
+      // Prepare request payload
+      const payload = {
+        cart: window.__CART_DATA__.cart,
+        merchant_id: orgName
+      };
+
+      console.log("[WIDGET] Calling backend with:", payload);
+
+      fetch("http://localhost:8081/api/v1/public/apply-coupons", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(window.__CART_DATA__),
+        body: JSON.stringify(payload),
       })
-        .then((res) => res.json())
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}`);
+          }
+          return res.json();
+        })
         .then((data) => {
+          console.log("[WIDGET] Response:", data);
           setOffers(data);
+        })
+        .catch((err) => {
+          console.error("[WIDGET] Error:", err);
+          setError(err.message);
         })
         .finally(() => setLoading(false));
     }
@@ -63,24 +91,46 @@ function Widget() {
     <div
       style={{
         padding: 16,
-        border: "1px solid #ccc",
-        background: config.theme === "dark" ? "#111" : "#fff",
-        color: config.theme === "dark" ? "#fff" : "#000",
+        border: "1px solid #444",
+        borderRadius: 8,
+        background: config.theme === "dark" ? "#1a1a2e" : "#fff",
+        color: config.theme === "dark" ? "#eee" : "#000",
         marginTop: 16,
         fontFamily: "sans-serif",
       }}
     >
-      <h3>Widget</h3>
-      <p>Merchant: {config.merchantId}</p>
-      <p>Theme: {config.theme}</p>
-
-      {loading && <p>Applying coupons…</p>}
-
-      {!loading && offers && (
-        <pre>{JSON.stringify(offers, null, 2)}</pre>
+      <h3 style={{ color: "#00d4ff", margin: "0 0 12px 0" }}>🎟️ Available Coupons</h3>
+      
+      {currentOrg && (
+        <p style={{ fontSize: 12, color: "#888", margin: "0 0 12px 0" }}>
+          Organization: <strong style={{ color: "#00d4ff" }}>{currentOrg}</strong>
+        </p>
       )}
 
-      {!loading && !offers && <p>No offers applied yet.</p>}
+      {loading && <p style={{ color: "#ffa500" }}>⏳ Fetching coupons…</p>}
+
+      {error && (
+        <p style={{ color: "#ff4444" }}>❌ Error: {error}</p>
+      )}
+
+      {!loading && !error && offers && (
+        <pre style={{
+          background: "#0f0f1a",
+          padding: 12,
+          borderRadius: 6,
+          overflow: "auto",
+          fontSize: 12,
+          maxHeight: 400,
+          whiteSpace: "pre-wrap",
+          wordBreak: "break-word"
+        }}>
+          {JSON.stringify(offers, null, 2)}
+        </pre>
+      )}
+
+      {!loading && !error && !offers && (
+        <p style={{ color: "#888" }}>Enter an org name and click "Apply Coupons" to see the response.</p>
+      )}
     </div>
   );
 }

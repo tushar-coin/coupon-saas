@@ -1,27 +1,5 @@
 [
   {
-    "id": "999be281-6a45-4820-bf82-9a58ba8c475d",
-    "org_name": "MuscleBlaze",
-    "code": "FLASH50",
-    "description": "Discount coupon",
-    "type": "fixed",
-    "level": "tag_level",
-    "discount_amount": 50,
-    "min_order_amount": 2000,
-    "max_discount": 500,
-    "applicable_tags": [
-      "electronics",
-      "tech",
-      "clothing"
-    ],
-    "is_active": true,
-    "visible": false,
-    "usage_limit": 10,
-    "usage_count": 0,
-    "expiry_date": "2026-01-23T06:30:00Z",
-    "created_at": "2026-01-17T01:32:09.2113559+05:30"
-  },
-  {
     "id": "c2b0c685-896c-4b0e-a9ef-6ef7ea9bf351",
     "org_name": "MuscleBlaze",
     "code": "CHECK20",
@@ -62,5 +40,45 @@
     "usage_count": 0,
     "expiry_date": "2026-01-23T06:30:00Z",
     "created_at": "2026-01-17T15:44:11.0399053+05:30"
+  },
+  {
+    "id": "e072b877-33b7-4053-af95-ec10d1abe2ae",
+    "org_name": "MuscleBlaze",
+    "code": "TestCoupon",
+    "description": "Testing coupon",
+    "type": "percentage",
+    "level": "cart_level",
+    "discount_amount": 20,
+    "min_order_amount": 100,
+    "max_discount": 1000,
+    "applicable_tags": [],
+    "is_active": true,
+    "visible": true,
+    "usage_limit": 10,
+    "usage_count": 0,
+    "expiry_date": "2026-01-30T06:30:00Z",
+    "created_at": "2026-01-17T19:01:33.0992718+05:30"
+  },
+  {
+    "id": "999be281-6a45-4820-bf82-9a58ba8c475d",
+    "org_name": "MuscleBlaze",
+    "code": "FLASH50",
+    "description": "Discount coupon",
+    "type": "fixed",
+    "level": "tag_level",
+    "discount_amount": 50,
+    "min_order_amount": 2000,
+    "max_discount": 500,
+    "applicable_tags": [
+      "electronics",
+      "tech",
+      "clothing"
+    ],
+    "is_active": true,
+    "visible": false,
+    "usage_limit": 10,
+    "usage_count": 0,
+    "expiry_date": "2026-01-23T06:30:00Z",
+    "created_at": "2026-01-17T01:32:09.2113559+05:30"
   }
 ]

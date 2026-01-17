@@ -4,6 +4,7 @@ import (
 	"coupon-backend/internal/domain"
 	"coupon-backend/internal/ports"
 	"fmt"
+	"log/slog"
 	"math"
 )
 
@@ -39,20 +40,84 @@ func (s *ComputationService) ComputeDiscount(cart domain.Cart, couponCode string
 		}, nil
 	}
 
-	// --- LOGIC PORTED FROM test.go ---
+	// Delegate logic
+	summary := s.calculateCartSummary(cart)
+	return s.applyCouponLogic(cart, *coupon, summary)
+}
 
-	// Pre-calculation
-	var productsInCoupon = make(map[string][]string) // tag -> []itemID
-	var productIdPrice = make(map[string]float64)
-	var totalCartAmount float64 = 0
+func (s *ComputationService) EvaluateAllCoupons(cart domain.Cart, orgName string) ([]domain.ComputeResult, error) {
+	slog.Info("Starting evaluation", "org", orgName)
+	coupons, err := s.repo.FindAll(orgName)
+	if err != nil {
+		slog.Error("Failed to fetch coupons", "error", err)
+		return nil, err
+	}
+
+	slog.Info("Found coupons", "count", len(coupons), "org", orgName)
+
+	// Pre-calculate cart summary once
+	summary := s.calculateCartSummary(cart)
+
+	var results []domain.ComputeResult
+	for _, coupon := range coupons {
+		if !coupon.IsActive {
+			continue
+		}
+
+		res, err := s.applyCouponLogic(cart, coupon, summary)
+		if err == nil && res.Success {
+			slog.Info("Coupon applied", "code", coupon.Code, "discount", res.DiscountAmount)
+			results = append(results, *res)
+		} else {
+			reason := "unknown"
+			if res != nil {
+				reason = res.Message
+			}
+			slog.Info("Coupon rejected", "code", coupon.Code, "reason", reason)
+		}
+	}
+
+	slog.Info("Evaluation complete", "applicable_count", len(results))
+	return results, nil
+}
+
+type cartSummary struct {
+	productsInCoupon map[string][]string // tag -> []itemID
+	productIdPrice   map[string]float64
+	totalCartAmount  float64
+}
+
+func (s *ComputationService) calculateCartSummary(cart domain.Cart) *cartSummary {
+	summary := &cartSummary{
+		productsInCoupon: make(map[string][]string),
+		productIdPrice:   make(map[string]float64),
+		totalCartAmount:  0,
+	}
 
 	for _, item := range cart.Items {
 		for _, tag := range item.Tags {
-			productsInCoupon[tag] = append(productsInCoupon[tag], item.ItemID)
+			summary.productsInCoupon[tag] = append(summary.productsInCoupon[tag], item.ItemID)
 		}
 		itemTotal := item.Price * float64(item.Quantity)
-		totalCartAmount += itemTotal
-		productIdPrice[item.ItemID] = itemTotal
+		summary.totalCartAmount += itemTotal
+		summary.productIdPrice[item.ItemID] = itemTotal
+	}
+	return summary
+}
+
+func (s *ComputationService) applyCouponLogic(cart domain.Cart, coupon domain.Coupon, summary *cartSummary) (*domain.ComputeResult, error) {
+	if !coupon.IsActive {
+		return &domain.ComputeResult{
+			Success: false,
+			Message: "Coupon is inactive",
+		}, nil
+	}
+
+	if coupon.UsageLimit > 0 && coupon.UsageCount >= coupon.UsageLimit {
+		return &domain.ComputeResult{
+			Success: false,
+			Message: "Coupon usage limit exceeded",
+		}, nil
 	}
 
 	var discountAmount float64
@@ -60,11 +125,11 @@ func (s *ComputationService) ComputeDiscount(cart domain.Cart, couponCode string
 	var success = true
 
 	if coupon.Level == domain.LevelCart {
-		if totalCartAmount < coupon.MinOrderAmount {
+		if summary.totalCartAmount < coupon.MinOrderAmount {
 			reason = "Insufficient cart amount for coupon application"
 			success = false
 		} else if coupon.Type == domain.DiscountTypePercentage {
-			rawDiscount := (coupon.DiscountAmount / 100) * totalCartAmount
+			rawDiscount := (coupon.DiscountAmount / 100) * summary.totalCartAmount
 			discountAmount = math.Min(rawDiscount, coupon.MaxDiscount)
 		} else {
 			discountAmount = coupon.DiscountAmount
@@ -73,14 +138,14 @@ func (s *ComputationService) ComputeDiscount(cart domain.Cart, couponCode string
 		// Logic for tag level
 		uniqueProductIds := make(map[string]struct{})
 		for _, tag := range coupon.ApplicableTags {
-			for _, pid := range productsInCoupon[tag] {
+			for _, pid := range summary.productsInCoupon[tag] {
 				uniqueProductIds[pid] = struct{}{}
 			}
 		}
 
 		var totalTagLevelAmount float64 = 0
 		for pid := range uniqueProductIds {
-			totalTagLevelAmount += productIdPrice[pid]
+			totalTagLevelAmount += summary.productIdPrice[pid]
 		}
 
 		if totalTagLevelAmount < coupon.MinOrderAmount {
@@ -102,6 +167,7 @@ func (s *ComputationService) ComputeDiscount(cart domain.Cart, couponCode string
 
 	return &domain.ComputeResult{
 		CouponID:       coupon.ID,
+		CouponCode:     coupon.Code,
 		DiscountAmount: discountAmount,
 		Message:        reason,
 		Success:        success,

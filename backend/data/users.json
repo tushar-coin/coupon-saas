@@ -10,6 +10,42 @@
     "email_verified": true
   },
   {
+    "id": "3143014c-e564-46b6-9ec6-e3e2c83aadaf",
+    "email": "rajandhiman597@gmail.com",
+    "org_id": "6860bcf2-15e5-4c50-a7a6-c22fe3aa289d",
+    "org_name": "CoupFlow",
+    "role": "owner",
+    "logo_url": "",
+    "password_hash": "$2a$10$zVScTzwROXfqsA7nmUYcI.6NmehjQKWbNwgOfRSazyRgyDNxjdOHe",
+    "created_at": "2026-01-15T16:38:03.3914177+05:30",
+    "email_verified": false,
+    "verification_token": "763b476855977cdc63c545739ff1e8ff404a6f8311f04e2000a2c42133b015d9",
+    "verification_expiry": "2026-01-16T16:38:03.3872686+05:30"
+  },
+  {
+    "id": "66fb2b26-dd3f-4229-8204-b59d44958f51",
+    "email": "rajaninvest597@gmail.com",
+    "org_id": "aebe1085-86be-435a-baeb-d5844a05fe0f",
+    "org_name": "HealthKart",
+    "role": "owner",
+    "logo_url": "",
+    "password_hash": "$2a$10$7z7RWHgc1RHIGO5kGdtagu.rR7KB3Xd1eMhQZ0fQ6dDh0302WYebi",
+    "created_at": "2026-01-17T00:17:15.5313763+05:30",
+    "email_verified": true
+  },
+  {
+    "id": "a26d325c-34a5-4060-bd42-6d511c0655a1",
+    "email": "rajaninvest597@gmail.com",
+    "org_id": "",
+    "org_name": "StarBucks",
+    "role": "",
+    "logo_url": "http://localhost:8081/uploads/a26d325c-34a5-4060-bd42-6d511c0655a1_logo.png",
+    "password_hash": "$2a$10$KmKwUKEd0WK0Pmgay/lvSu90rg0IEUdt./oGM7XM9JcEEWgFJjg6C",
+    "created_at": "2026-01-15T14:51:02.8364434+05:30",
+    "email_verified": true,
+    "reset_token_used": true
+  },
+  {
     "id": "a2c8e564-8d53-4f96-a825-e204ab8edf77",
     "email": "pizzahut597@gmail.com",
     "org_id": "",
@@ -62,19 +98,6 @@
     "email_verified": true
   },
   {
-    "id": "3143014c-e564-46b6-9ec6-e3e2c83aadaf",
-    "email": "rajandhiman597@gmail.com",
-    "org_id": "6860bcf2-15e5-4c50-a7a6-c22fe3aa289d",
-    "org_name": "CoupFlow",
-    "role": "owner",
-    "logo_url": "",
-    "password_hash": "$2a$10$zVScTzwROXfqsA7nmUYcI.6NmehjQKWbNwgOfRSazyRgyDNxjdOHe",
-    "created_at": "2026-01-15T16:38:03.3914177+05:30",
-    "email_verified": false,
-    "verification_token": "763b476855977cdc63c545739ff1e8ff404a6f8311f04e2000a2c42133b015d9",
-    "verification_expiry": "2026-01-16T16:38:03.3872686+05:30"
-  },
-  {
     "id": "5f7982bc-2fe1-430a-b0f4-7a6bd212bb4a",
     "email": "rajan597@gmail.com",
     "org_id": "",
@@ -83,17 +106,6 @@
     "logo_url": "http://localhost:8081/uploads/5f7982bc-2fe1-430a-b0f4-7a6bd212bb4a_logo.png",
     "created_at": "2026-01-15T13:56:26.4346473+05:30",
     "email_verified": false
-  },
-  {
-    "id": "66fb2b26-dd3f-4229-8204-b59d44958f51",
-    "email": "rajaninvest597@gmail.com",
-    "org_id": "aebe1085-86be-435a-baeb-d5844a05fe0f",
-    "org_name": "HealthKart",
-    "role": "owner",
-    "logo_url": "",
-    "password_hash": "$2a$10$7z7RWHgc1RHIGO5kGdtagu.rR7KB3Xd1eMhQZ0fQ6dDh0302WYebi",
-    "created_at": "2026-01-17T00:17:15.5313763+05:30",
-    "email_verified": true
   },
   {
     "id": "02b6ffe0-0c8f-4aa4-8df0-9241bbd288c5",
@@ -116,17 +128,5 @@
     "password_hash": "$2a$10$Q4zwMy314kKYc3j6uU81aOfBurBbON4v0zqc6fdUx9pdOdcpK2duG",
     "created_at": "2026-01-15T15:47:47.5773443+05:30",
     "email_verified": true
-  },
-  {
-    "id": "a26d325c-34a5-4060-bd42-6d511c0655a1",
-    "email": "rajaninvest597@gmail.com",
-    "org_id": "",
-    "org_name": "StarBucks",
-    "role": "",
-    "logo_url": "http://localhost:8081/uploads/a26d325c-34a5-4060-bd42-6d511c0655a1_logo.png",
-    "password_hash": "$2a$10$KmKwUKEd0WK0Pmgay/lvSu90rg0IEUdt./oGM7XM9JcEEWgFJjg6C",
-    "created_at": "2026-01-15T14:51:02.8364434+05:30",
-    "email_verified": true,
-    "reset_token_used": true
   }
 ]

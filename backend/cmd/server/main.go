@@ -1,16 +1,20 @@
 package main
 
 import (
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 
 	"coupon-backend/internal/handler"
 	"coupon-backend/internal/repository/jsonrepo"
 	"coupon-backend/internal/service"
+	"coupon-backend/pkg/logger"
 )
 
 func main() {
+	// 0. Initialize Logger
+	logger.InitLogger()
+
 	// 1. Initialize Repositories
 	dataDir := "./data"
 	if _, err := os.Stat(dataDir); os.IsNotExist(err) {
@@ -41,6 +45,7 @@ func main() {
 
 	// Public Widget API
 	mux.HandleFunc("POST /api/v1/public/compute", h.ComputeDiscount)
+	mux.HandleFunc("POST /api/v1/public/apply-coupons", h.ApplyCoupons)
 
 	// Auth API (Public)
 	mux.HandleFunc("POST /api/v1/auth/register", authH.Register)
@@ -80,12 +85,15 @@ func main() {
 	// Apply CORS
 	handlerWithCORS := h.EnableCORS(mux)
 
+	// Apply Logging Middleware
+	handlerWithLogging := h.LoggingMiddleware(handlerWithCORS)
+
 	// 5. Start Server
 	port := ":8081"
-	log.Printf("🚀 Backend Server starting on %s", port)
-	log.Printf("   Data directory: %s", dataDir)
+	slog.Info("🚀 Backend Server starting", "port", port, "data_dir", dataDir)
 
-	if err := http.ListenAndServe(port, handlerWithCORS); err != nil {
-		log.Fatalf("Server failed: %v", err)
+	if err := http.ListenAndServe(port, handlerWithLogging); err != nil {
+		slog.Error("Server failed", "error", err)
+		os.Exit(1)
 	}
 }
