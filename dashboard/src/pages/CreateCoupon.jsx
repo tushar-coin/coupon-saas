@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Check, ChevronRight, Tag, DollarSign, FileText, Calendar } from "lucide-react";
+import { ArrowLeft, Check, ChevronRight, Tag, DollarSign, FileText, Calendar, ShoppingCart, Layers } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import confetti from "canvas-confetti";
 import { z } from "zod"; // Zod for validation
@@ -10,6 +10,10 @@ import Button from "../components/ui/Button";
 import Select from "../components/ui/Select";
 import DateTimePicker from "../components/ui/DateTimePicker";
 import Toast from "../components/ui/Toast"; // Toast notification
+import TagSelector from "../components/ui/TagSelector"; // NEW: Tag selector
+
+import useCouponStore from "../store/useCouponStore";
+import useOrganizationStore from "../store/useOrganizationStore"; // NEW: Organization store
 
 import "../styles/CreateCoupon.css";
 
@@ -18,8 +22,6 @@ const STEPS = [
   { id: 2, title: "Rules & Limits" },
   { id: 3, title: "Visibility" },
 ];
-
-import useCouponStore from "../store/useCouponStore";
 
 // Validation Schemas
 const step1Schema = z.object({
@@ -66,6 +68,7 @@ export default function CreateCoupon() {
   const isEditMode = Boolean(id);
   
   const { coupons, addCoupon, updateCoupon, getCouponById, initialize } = useCouponStore();
+  const { tags: organizationTags, fetchOrganization } = useOrganizationStore();
 
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({ 
@@ -73,6 +76,9 @@ export default function CreateCoupon() {
     description: "", 
     type: "Percentage", 
     value: "", 
+    maxDiscount: "",      // NEW: Max discount cap for percentage
+    level: "cart_level",  // NEW: cart_level or tag_level
+    applicableTags: [],   // NEW: Tags for tag_level coupons
     minOrder: "", 
     usageLimit: "", 
     expiryDate: "", 
@@ -85,7 +91,8 @@ export default function CreateCoupon() {
   // Initialize store if landing directly here
   useEffect(() => {
     initialize();
-  }, [initialize]);
+    fetchOrganization(); // NEW: Fetch organization tags
+  }, [initialize, fetchOrganization]);
 
   // Load Data for Edit Mode
   useEffect(() => {
@@ -97,6 +104,9 @@ export default function CreateCoupon() {
           description: existingCoupon.description || "",
           type: existingCoupon.type,
           value: existingCoupon.value,
+          maxDiscount: existingCoupon.maxDiscount || "", // NEW
+          level: existingCoupon.level || "cart_level",  // NEW
+          applicableTags: existingCoupon.applicableTags || [], // NEW
           minOrder: existingCoupon.minOrder || "",
           usageLimit: existingCoupon.usageLimit || "",
           expiryDate: existingCoupon.expiryDate || "",
@@ -211,7 +221,7 @@ export default function CreateCoupon() {
     
     try {
       if (isEditMode) {
-        updateCoupon(id, formData);
+        await updateCoupon(id, formData);
         toastRef.current.addToast("Coupon updated successfully!", "success");
       } else {
         await addCoupon(formData);
@@ -323,6 +333,71 @@ export default function CreateCoupon() {
                 </div>
               </div>
 
+              {/* NEW: Maximum Discount Cap - Only for Percentage */}
+              {formData.type === "Percentage" && (
+                <div className="form-group">
+                  <FloatingLabelInput
+                    label="Maximum Discount Cap ($)"
+                    name="maxDiscount"
+                    type="number"
+                    value={formData.maxDiscount}
+                    onChange={handleChange}
+                    icon={DollarSign}
+                  />
+                  <span className="helper-text">
+                    Optional: Caps the maximum discount (e.g., 20% off, up to $50)
+                  </span>
+                </div>
+              )}
+
+              {/* NEW: Coupon Level Toggle - Now in a section box */}
+              <div className="section-box">
+                <label className="section-label">Coupon Scope</label>
+                <p className="section-description">Choose if this coupon applies to the entire cart or specific product categories.</p>
+                <div className="level-toggle">
+                  <label className={`level-option ${formData.level === "cart_level" ? "selected" : ""}`}>
+                    <input
+                      type="radio"
+                      name="level"
+                      value="cart_level"
+                      checked={formData.level === "cart_level"}
+                      onChange={handleChange}
+                    />
+                    <ShoppingCart size={24} />
+                    <span>Entire Cart</span>
+                  </label>
+                  <label className={`level-option ${formData.level === "tag_level" ? "selected" : ""}`}>
+                    <input
+                      type="radio"
+                      name="level"
+                      value="tag_level"
+                      checked={formData.level === "tag_level"}
+                      onChange={handleChange}
+                    />
+                    <Layers size={24} />
+                    <span>Specific Categories</span>
+                  </label>
+                </div>
+
+                {/* Tag Selector - Inside the section box */}
+                {formData.level === "tag_level" && (
+                  <div className="tag-selector-wrapper">
+                    <label className="subsection-label">Select Categories</label>
+                    <TagSelector
+                      availableTags={organizationTags}
+                      selectedTags={formData.applicableTags}
+                      onChange={(tags) => setFormData(prev => ({...prev, applicableTags: tags}))}
+                      placeholder="Choose product categories..."
+                      emptyMessage="No categories defined. Add them in Settings → Product Categories."
+                    />
+                    <span className="helper-text">
+                      Coupon will only apply to items in these categories.
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Description - At the end */}
               <div className="form-group">
                 <label>Description (Optional)</label>
                 <textarea

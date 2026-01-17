@@ -1,0 +1,224 @@
+.tag-selector {
+    position: relative;
+    width: 100%;
+}
+
+.tag-selector-input {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 54px;
+    padding: 0.6rem 1rem;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background: var(--bg-card);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.tag-selector-input:hover {
+    border-color: var(--primary-light);
+}
+
+.tag-selector-input.focused {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-light);
+}
+
+.selected-tags-area {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    flex: 1;
+    align-items: center;
+}
+
+.placeholder {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.selected-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.4rem 0.7rem;
+    background: var(--primary-light);
+    color: var(--primary);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: 1px solid var(--primary);
+}
+
+.remove-tag {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--primary);
+    opacity: 0.7;
+    border-radius: 50%;
+    transition: all 0.15s ease;
+}
+
+.remove-tag:hover {
+    opacity: 1;
+    background: var(--primary);
+    color: white;
+}
+
+.dropdown-icon {
+    color: var(--text-muted);
+    transition: transform 0.25s ease;
+    flex-shrink: 0;
+    margin-left: 0.5rem;
+}
+
+.dropdown-icon.rotated {
+    transform: rotate(180deg);
+}
+
+/* Dropdown - positioned BELOW with proper containment */
+.tag-dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    right: 0;
+    background-color: var(--bg-card);
+    border: 2px solid var(--primary);
+    border-radius: 14px;
+    box-shadow: var(--shadow-lg);
+    z-index: 9999;
+    overflow: hidden;
+    animation: dropdownSlideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes dropdownSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.tag-search-wrapper {
+    position: relative;
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg-hover);
+}
+
+.search-icon {
+    position: absolute;
+    left: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+}
+
+.tag-search {
+    width: 100%;
+    padding: 0.75rem 0.75rem 0.75rem 2.5rem;
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg-card);
+    color: var(--text-main);
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+}
+
+.tag-search:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.tag-options {
+    max-height: 200px;
+    overflow-y: auto;
+    padding: 0.5rem;
+}
+
+.tag-option {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.85rem 1rem;
+    cursor: pointer;
+    color: var(--text-main);
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 10px;
+    transition: all 0.15s ease;
+    margin-bottom: 0.25rem;
+}
+
+.tag-option:last-child {
+    margin-bottom: 0;
+}
+
+.tag-option:hover {
+    background: var(--primary-light);
+    color: var(--primary);
+}
+
+.tag-option svg {
+    opacity: 0.6;
+}
+
+.tag-option:hover svg {
+    opacity: 1;
+}
+
+.no-tags-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 2rem 1.5rem;
+    text-align: center;
+    color: var(--text-muted);
+}
+
+.no-tags-message svg {
+    opacity: 0.4;
+}
+
+.no-tags-message span {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    max-width: 240px;
+}
+
+.no-results {
+    padding: 1.25rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+}
+
+/* Custom scrollbar for dropdown */
+.tag-options::-webkit-scrollbar {
+    width: 6px;
+}
+
+.tag-options::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.tag-options::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+
+.tag-options::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+}

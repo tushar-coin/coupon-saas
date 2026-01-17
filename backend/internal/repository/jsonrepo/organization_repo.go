@@ -107,3 +107,15 @@ func (r *FileOrganizationRepository) Exists(name string) bool {
 	}
 	return false
 }
+
+func (r *FileOrganizationRepository) Update(org *domain.Organization) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if _, ok := r.orgs[org.ID]; !ok {
+		return fmt.Errorf("organization not found")
+	}
+
+	r.orgs[org.ID] = *org
+	return r.flush()
+}

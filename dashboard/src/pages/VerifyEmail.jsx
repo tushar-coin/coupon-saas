@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import "../styles/Auth.css";
 
@@ -10,6 +10,9 @@ export default function VerifyEmail() {
 
   const [status, setStatus] = useState("verifying"); // verifying, success, error
   const [message, setMessage] = useState("");
+  
+  // Guard against React StrictMode double-execution
+  const hasVerified = useRef(false);
 
   useEffect(() => {
     if (!token) {
@@ -17,6 +20,12 @@ export default function VerifyEmail() {
       setMessage("Invalid verification link.");
       return;
     }
+
+    // Prevent double API call in React StrictMode
+    if (hasVerified.current) {
+      return;
+    }
+    hasVerified.current = true;
 
     // Call verification API
     const verifyEmail = async () => {

@@ -1,11 +1,19 @@
-import { Upload, Save, User as UserIcon, Building } from "lucide-react";
+import { Upload, Save, User as UserIcon, Building, Tag } from "lucide-react";
 import useAuthStore from "../store/useAuthStore";
-import { useRef } from "react";
+import useOrganizationStore from "../store/useOrganizationStore";
+import { useRef, useEffect } from "react";
+import TagManager from "../components/ui/TagManager";
 import "../styles/Settings.css";
 
 export default function Settings() {
-  const { user, uploadLogo, isLoading } = useAuthStore();
+  const { user, uploadLogo, isLoading: authLoading } = useAuthStore();
+  const { tags, fetchOrganization, addTag, removeTag, isLoading: orgLoading } = useOrganizationStore();
   const fileInputRef = useRef(null);
+
+  // Fetch organization data on mount
+  useEffect(() => {
+    fetchOrganization();
+  }, [fetchOrganization]);
 
   const getInitials = (name) => {
     return name ? name.substring(0, 2).toUpperCase() : "OR";
@@ -26,6 +34,7 @@ export default function Settings() {
 
   return (
     <div className="settings-container">
+      {/* Organization Profile Card */}
       <div className="card settings-card">
         <h3 className="card-title">Organization Profile</h3>
         
@@ -50,9 +59,9 @@ export default function Settings() {
             <button 
                 className="btn-secondary btn-sm"
                 onClick={() => fileInputRef.current.click()}
-                disabled={isLoading}
+                disabled={authLoading}
             >
-              <Upload size={16} /> {isLoading ? "Uploading..." : "Change Logo"}
+              <Upload size={16} /> {authLoading ? "Uploading..." : "Change Logo"}
             </button>
           </div>
 
@@ -82,13 +91,25 @@ export default function Settings() {
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="settings-footer">
-          <button className="btn-primary" disabled title="Update feature coming soon">
-            <Save size={18} /> Save Changes
-          </button>
-        </div>
+      {/* Product Categories / Tags Card */}
+      <div className="card settings-card">
+        <h3 className="card-title">
+          <Tag size={20} /> Product Categories / Tags
+        </h3>
+        <p className="card-description">
+          Define categories for your products. These can be used to target coupons to specific product categories.
+        </p>
+        
+        <TagManager 
+          tags={tags}
+          onAddTag={addTag}
+          onRemoveTag={removeTag}
+          isLoading={orgLoading}
+        />
       </div>
     </div>
   );
 }
+

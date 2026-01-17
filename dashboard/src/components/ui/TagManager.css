@@ -1,0 +1,197 @@
+.tag-manager {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+.tag-input-row {
+    display: flex;
+    gap: 0.75rem;
+    align-items: stretch;
+}
+
+.tag-input-wrapper {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.tag-input-icon {
+    position: absolute;
+    left: 1rem;
+    color: var(--text-muted);
+    pointer-events: none;
+    transition: color 0.2s ease;
+}
+
+.tag-input-wrapper:focus-within .tag-input-icon {
+    color: var(--primary);
+}
+
+.tag-input {
+    width: 100%;
+    padding: 1rem 1rem 1rem 3rem;
+    border-radius: 12px;
+    border: 2px solid var(--border);
+    background: var(--bg-card);
+    color: var(--text-main);
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.tag-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 4px var(--primary-light);
+}
+
+.tag-input::placeholder {
+    color: var(--text-muted);
+}
+
+.btn-add-tag {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary) 0%, #7c3aed 100%);
+    color: white;
+    font-weight: 600;
+    font-size: 0.9rem;
+    border: none;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    white-space: nowrap;
+    box-shadow: var(--shadow-sm);
+}
+
+.btn-add-tag:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.btn-add-tag:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.btn-add-tag:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.tag-error {
+    color: var(--danger);
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: -0.5rem;
+}
+
+.tags-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 1.25rem;
+    background: var(--bg-hover);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+}
+
+.tags-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tags-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+}
+
+.tag-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.6rem 0.9rem;
+    background: var(--bg-card);
+    color: var(--text-main);
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    border: 1.5px solid var(--border);
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.tag-chip:hover {
+    border-color: var(--danger);
+    background: var(--danger-bg);
+}
+
+.tag-chip:hover .tag-remove {
+    color: var(--danger);
+    opacity: 1;
+}
+
+.tag-remove {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--text-muted);
+    opacity: 0.6;
+    transition: all 0.2s ease;
+    border-radius: 50%;
+}
+
+.tag-remove:hover {
+    background: var(--danger);
+    color: white;
+    opacity: 1;
+}
+
+.tag-remove:disabled {
+    cursor: not-allowed;
+    opacity: 0.3;
+}
+
+.tags-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 2rem;
+    text-align: center;
+    color: var(--text-muted);
+    background: var(--bg-hover);
+    border-radius: 14px;
+    border: 2px dashed var(--border);
+}
+
+.tags-empty svg {
+    opacity: 0.4;
+    margin-bottom: 0.5rem;
+}
+
+.tags-empty p {
+    margin: 0.25rem 0;
+    font-weight: 600;
+    color: var(--text-main);
+    font-size: 0.95rem;
+}
+
+.tags-empty span {
+    font-size: 0.85rem;
+    max-width: 280px;
+}

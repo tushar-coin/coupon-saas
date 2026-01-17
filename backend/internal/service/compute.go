@@ -122,3 +122,49 @@ func (s *ComputationService) CreateCoupon(c *domain.Coupon) error {
 func (s *ComputationService) GetAllCoupons(orgName string) ([]domain.Coupon, error) {
 	return s.repo.FindAll(orgName)
 }
+
+func (s *ComputationService) UpdateCoupon(c *domain.Coupon) error {
+	// 1. Fetch Existing
+	existing, err := s.repo.FindByID(c.ID)
+	if err != nil {
+		return err
+	}
+
+	// 2. Verify Ownership
+	if existing.OrgName != c.OrgName {
+		return fmt.Errorf("unauthorized: coupon does not belong to this organization")
+	}
+
+	// 3. Unique Check (if code changed)
+	if existing.Code != c.Code {
+		orgCoupons, _ := s.repo.FindAll(c.OrgName)
+		for _, other := range orgCoupons {
+			if other.ID != c.ID && other.Code == c.Code {
+				return fmt.Errorf("coupon code already exists in this organization")
+			}
+		}
+	}
+
+	// 4. Preserve Immutable Fields
+	c.CreatedAt = existing.CreatedAt
+	c.UsageCount = existing.UsageCount // System managed
+
+	// 5. Update
+	return s.repo.Update(c)
+}
+
+func (s *ComputationService) DeleteCoupon(id string, orgName string) error {
+	// 1. Fetch Existing
+	existing, err := s.repo.FindByID(id)
+	if err != nil {
+		return err
+	}
+
+	// 2. Verify Ownership
+	if existing.OrgName != orgName {
+		return fmt.Errorf("unauthorized: coupon does not belong to this organization")
+	}
+
+	// 3. Delete
+	return s.repo.Delete(id)
+}

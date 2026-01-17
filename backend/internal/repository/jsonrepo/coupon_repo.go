@@ -119,3 +119,15 @@ func (r *FileCouponRepository) FindAll(orgName string) ([]domain.Coupon, error) 
 func (r *FileCouponRepository) Update(coupon *domain.Coupon) error {
 	return r.Save(coupon)
 }
+
+func (r *FileCouponRepository) Delete(id string) error {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	if _, ok := r.coupons[id]; !ok {
+		return fmt.Errorf("coupon not found")
+	}
+
+	delete(r.coupons, id)
+	return r.flush()
+}

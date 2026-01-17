@@ -117,6 +117,43 @@
     flex: 1;
 }
 
+/* Section Box - Visual container for grouped fields */
+.section-box {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 0.5rem;
+    position: relative;
+}
+
+.section-description {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    margin: -0.75rem 0 0.5rem 0;
+    line-height: 1.6;
+}
+
+.subsection-label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    margin-bottom: 0.5rem;
+}
+
+.tag-selector-wrapper {
+    position: relative;
+    z-index: 100;
+    margin-top: 0.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
 .code-input {
     font-family: monospace;
     font-size: 1.25rem;
@@ -150,7 +187,7 @@
 
 .radio-card:hover {
     border-color: var(--primary);
-    background: var(--bg-main);
+    background: var(--bg-hover);
 }
 
 .radio-card input {
@@ -192,13 +229,11 @@
 .floating-input-mimic {
     position: relative;
     background: var(--bg-card);
-    border: 1px solid var(--border);
+    border: 2px solid var(--border);
     border-radius: var(--radius-md);
     padding-top: 5px;
-    /* Space for the label to sit nicely */
     transition: all 0.2s;
     height: 58px;
-    /* Match standard floating input height */
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -209,43 +244,59 @@
     box-shadow: 0 0 0 3px var(--primary-light);
 }
 
+/* Generalized Input Style for Textarea/etc */
+.create-coupon-container .input {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--bg-card);
+    transition: all 0.2s;
+    font-family: inherit;
+    font-size: 1rem;
+    color: var(--text-main);
+}
+
+.create-coupon-container .input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px var(--primary-light);
+}
+
+.create-coupon-container .input::placeholder {
+    color: var(--text-muted);
+}
+
 .floating-input-mimic .custom-select-container {
     width: 100%;
     min-width: 0;
-    /* Prevent overflow */
 }
 
-/* Remove default border of Select since Wrapper has it */
 .floating-input-mimic .custom-select-trigger {
     border: none;
     background: transparent;
     padding: 0.75rem 1rem;
     height: 100%;
+    color: var(--text-main);
 }
 
 .floating-mimic-label {
     position: absolute;
     left: 1rem;
     top: 50%;
-    /* Start centered */
     transform: translateY(-50%) translateY(-14px) scale(0.85);
-    /* Simulate the floated state */
     transform-origin: left center;
     color: var(--text-muted);
     font-size: 1rem;
-    /* Base size, scaled down by transform */
     pointer-events: none;
     z-index: 10;
 }
 
-/* Adjust Select trigger to align text properly below label */
 .floating-input-mimic .custom-select-trigger>div:first-child,
 .floating-input-mimic .datetime-trigger .trigger-content {
     margin-top: 8px;
-    /* Slightly reduced to optimize vertical centering */
 }
 
-/* Date Input Customization */
 .custom-date-input {
     width: 100%;
     height: 100%;
@@ -255,12 +306,10 @@
     font-size: 1rem;
     color: var(--text-main);
     padding: 1.25rem 1rem 0 3rem;
-    /* Top padding pushes text down, Left padding clears icon */
     font-family: inherit;
     cursor: text;
 }
 
-/* Remove default icon visibility but maximize clickable area */
 .custom-date-input::-webkit-calendar-picker-indicator {
     position: absolute;
     top: 0;
@@ -273,13 +322,8 @@
     background: transparent;
     cursor: pointer;
     opacity: 0;
-    /* Hide visual but keep clickable */
 }
 
-/* Ensure placeholder look for empty date if needed, though datetime-local is tricky */
-
-
-/* Icon Position */
 .input-icon-mimic {
     position: absolute;
     left: 1rem;
@@ -292,12 +336,10 @@
     justify-content: center;
 }
 
-/* Focused State for Icon */
 .floating-input-mimic:focus-within .input-icon-mimic {
     color: var(--primary);
 }
 
-/* Error State for Mimic */
 .floating-input-mimic.error-border {
     border-color: var(--danger);
 }
@@ -309,8 +351,118 @@
     display: block;
 }
 
-/* Label adjustments when icon is present */
 .floating-mimic-label.with-icon {
     left: 3rem;
-    /* Align with text start */
+}
+
+/* Section Label */
+.section-label {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-main);
+    margin-bottom: 0.75rem;
+    letter-spacing: 0.2px;
+}
+
+/* Coupon Level Toggle - Card Style */
+.level-toggle {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.level-option {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 1.5rem 1rem;
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    background: var(--bg-card);
+    color: var(--text-muted);
+    font-weight: 500;
+    overflow: hidden;
+}
+
+.level-option::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, var(--primary-light) 0%, rgba(124, 58, 237, 0.1) 100%);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.level-option input {
+    display: none;
+}
+
+.level-option svg {
+    position: relative;
+    z-index: 1;
+    transition: all 0.25s ease;
+}
+
+.level-option span {
+    position: relative;
+    z-index: 1;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.level-option:hover {
+    border-color: var(--primary-light);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.level-option:hover::before {
+    opacity: 0.5;
+}
+
+.level-option.selected {
+    border-color: var(--primary);
+    color: var(--primary);
+    box-shadow: var(--shadow-md);
+}
+
+.level-option.selected::before {
+    opacity: 1;
+}
+
+.level-option.selected svg {
+    color: var(--primary);
+    transform: scale(1.1);
+}
+
+.level-option.selected::after {
+    content: '✓';
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    width: 20px;
+    height: 20px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+@media (max-width: 480px) {
+    .level-toggle {
+        grid-template-columns: 1fr;
+    }
 }

@@ -8,6 +8,7 @@ type CouponRepository interface {
 	FindByCode(code string) (*domain.Coupon, error)
 	FindAll(orgName string) ([]domain.Coupon, error)
 	Update(coupon *domain.Coupon) error
+	Delete(id string) error
 }
 
 type UserRepository interface {
@@ -25,6 +26,7 @@ type OrganizationRepository interface {
 	FindByID(id string) (*domain.Organization, error)
 	FindByName(name string) (*domain.Organization, error)
 	Exists(name string) bool
+	Update(org *domain.Organization) error
 }
 
 type InvitationRepository interface {

@@ -3,6 +3,32 @@
     "id": "01945ff4-e863-4a99-8a26-f5176eaa92b0",
     "name": "BurgerKing",
     "owner_id": "02b6ffe0-0c8f-4aa4-8df0-9241bbd288c5",
+    "tags": null,
     "created_at": "2026-01-15T15:31:22.1654448+05:30"
+  },
+  {
+    "id": "6860bcf2-15e5-4c50-a7a6-c22fe3aa289d",
+    "name": "CoupFlow",
+    "owner_id": "3143014c-e564-46b6-9ec6-e3e2c83aadaf",
+    "tags": null,
+    "created_at": "2026-01-15T16:38:03.3888057+05:30"
+  },
+  {
+    "id": "aebe1085-86be-435a-baeb-d5844a05fe0f",
+    "name": "HealthKart",
+    "owner_id": "66fb2b26-dd3f-4229-8204-b59d44958f51",
+    "tags": null,
+    "created_at": "2026-01-17T00:17:15.5313763+05:30"
+  },
+  {
+    "id": "9f61577f-0158-42b4-a183-e8055537ec08",
+    "name": "MuscleBlaze",
+    "owner_id": "88528384-2030-44c4-9680-d0e4974989a9",
+    "tags": [
+      "electronics",
+      "clothing",
+      "tech"
+    ],
+    "created_at": "2026-01-17T00:24:59.7580497+05:30"
   }
 ]

@@ -112,3 +112,41 @@ func (h *Handler) GetAllCoupons(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(coupons)
 }
+
+// PUT /api/v1/dashboard/coupons/{id}
+func (h *Handler) UpdateCoupon(w http.ResponseWriter, r *http.Request) {
+	orgName := r.Context().Value("org_name").(string)
+	id := r.PathValue("id")
+
+	var coupon domain.Coupon
+	if err := json.NewDecoder(r.Body).Decode(&coupon); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+
+	coupon.ID = id
+	coupon.OrgName = orgName
+
+	err := h.svc.UpdateCoupon(&coupon)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(coupon)
+}
+
+// DELETE /api/v1/dashboard/coupons/{id}
+func (h *Handler) DeleteCoupon(w http.ResponseWriter, r *http.Request) {
+	orgName := r.Context().Value("org_name").(string)
+	id := r.PathValue("id")
+
+	if err := h.svc.DeleteCoupon(id, orgName); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}

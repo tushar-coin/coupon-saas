@@ -31,6 +31,7 @@ func main() {
 	h := handler.NewHandler(computeSvc)
 	authH := handler.NewAuthHandler(authSvc)
 	teamH := handler.NewTeamHandler(teamSvc, authSvc)
+	orgH := handler.NewOrgHandler(orgRepo)
 
 	// 4. Setup Router
 	mux := http.NewServeMux()
@@ -61,6 +62,8 @@ func main() {
 	// Protected Dashboard APIs
 	mux.HandleFunc("GET /api/v1/dashboard/coupons", authH.AuthMiddleware(h.GetAllCoupons))
 	mux.HandleFunc("POST /api/v1/dashboard/coupons", authH.AuthMiddleware(h.CreateCoupon))
+	mux.HandleFunc("PUT /api/v1/dashboard/coupons/{id}", authH.AuthMiddleware(h.UpdateCoupon))
+	mux.HandleFunc("DELETE /api/v1/dashboard/coupons/{id}", authH.AuthMiddleware(h.DeleteCoupon))
 
 	// Protected Team APIs
 	mux.HandleFunc("POST /api/v1/team/invite", authH.AuthMiddleware(teamH.InviteUser))
@@ -69,6 +72,10 @@ func main() {
 	mux.HandleFunc("DELETE /api/v1/team/members/{userId}", authH.AuthMiddleware(teamH.RemoveMember))
 	mux.HandleFunc("PUT /api/v1/team/members/{userId}/role", authH.AuthMiddleware(teamH.UpdateRole))
 	mux.HandleFunc("DELETE /api/v1/team/invitations/{invitationId}", authH.AuthMiddleware(teamH.CancelInvitation))
+
+	// Protected Organization APIs
+	mux.HandleFunc("GET /api/v1/organization", authH.AuthMiddleware(orgH.GetOrganization))
+	mux.HandleFunc("PUT /api/v1/organization/tags", authH.AuthMiddleware(orgH.UpdateTags))
 
 	// Apply CORS
 	handlerWithCORS := h.EnableCORS(mux)

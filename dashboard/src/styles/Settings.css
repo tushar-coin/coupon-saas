@@ -1,21 +1,42 @@
 .settings-container {
-    max-width: 600px;
+    max-width: 700px;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
 }
 
 .settings-card {
     padding: 2rem;
+    border-radius: 16px;
 }
 
 .card-title {
-    font-size: 1.25rem;
-    font-weight: 600;
-    margin-bottom: 2rem;
-    padding-bottom: 1rem;
-    border-bottom: 1px solid var(--border);
+    font-size: 1.15rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    padding-bottom: 0;
+    border-bottom: none;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--color-text);
+}
+
+.card-title svg {
+    color: var(--color-primary);
+}
+
+.card-description {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid var(--color-border);
 }
 
 .settings-section {
-    margin-bottom: 2.5rem;
+    margin-bottom: 1.5rem;
 }
 
 .logo-upload {
@@ -23,19 +44,23 @@
     align-items: center;
     gap: 1.5rem;
     margin-bottom: 2rem;
+    padding: 1.25rem;
+    background: var(--color-surface-alt);
+    border-radius: 12px;
 }
 
 .logo-placeholder {
-    width: 4rem;
-    height: 4rem;
-    border-radius: var(--radius-lg);
-    background: var(--primary-light);
-    color: var(--primary);
+    width: 5rem;
+    height: 5rem;
+    border-radius: 14px;
+    background: linear-gradient(135deg, var(--color-primary-alpha) 0%, rgba(124, 58, 237, 0.15) 100%);
+    color: var(--color-primary);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     font-weight: 700;
+    border: 2px solid var(--color-primary-alpha);
 }
 
 .form-grid {
@@ -47,14 +72,12 @@
     font-size: 1rem;
     font-weight: 600;
     margin-bottom: 1rem;
-    color: var(--text-main);
+    color: var(--color-text);
 }
-
-
 
 .settings-footer {
     display: flex;
     justify-content: flex-end;
     padding-top: 1.5rem;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--color-border);
 }
