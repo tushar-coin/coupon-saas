@@ -7,6 +7,7 @@ import (
 	"log/slog"
 	"math"
 	"strings"
+	"time"
 )
 
 type ComputationService struct {
@@ -22,26 +23,13 @@ func (s *ComputationService) ComputeDiscount(cart domain.Cart, couponCode string
 	coupon, err := s.repo.FindByCode(couponCode)
 	if err != nil {
 		return &domain.ComputeResult{
-			Success: false,
-			Message: "Invalid coupon code",
+			Success:    false,
+			Message:    "Invalid coupon code",
+			ReasonCode: domain.ReasonInvalidCode,
 		}, nil // Not an error, just failed application
 	}
 
-	if !coupon.IsActive {
-		return &domain.ComputeResult{
-			Success: false,
-			Message: "Coupon is inactive",
-		}, nil
-	}
-
-	if coupon.UsageLimit > 0 && coupon.UsageCount >= coupon.UsageLimit {
-		return &domain.ComputeResult{
-			Success: false,
-			Message: "Coupon usage limit exceeded",
-		}, nil
-	}
-
-	// Delegate logic
+	// Delegate all validation and calculation logic
 	summary := s.calculateCartSummary(cart)
 	return s.applyCouponLogic(cart, *coupon, summary)
 }
@@ -61,21 +49,19 @@ func (s *ComputationService) EvaluateAllCoupons(cart domain.Cart, orgName string
 
 	var results []domain.ComputeResult
 	for _, coupon := range coupons {
-		if !coupon.IsActive {
+		res, err := s.applyCouponLogic(cart, coupon, summary)
+		if err != nil {
+			slog.Error("Error evaluating coupon", "code", coupon.Code, "error", err)
 			continue
 		}
 
-		res, err := s.applyCouponLogic(cart, coupon, summary)
-		if err == nil && res.Success {
+		if res.Success {
 			slog.Info("Coupon applied", "code", coupon.Code, "discount", res.DiscountAmount)
-			results = append(results, *res)
 		} else {
-			reason := "unknown"
-			if res != nil {
-				reason = res.Message
-			}
-			slog.Info("Coupon rejected", "code", coupon.Code, "reason", reason)
+			slog.Info("Coupon rejected", "code", coupon.Code, "reason", res.Message)
 		}
+		// Append all results, effective or not, for debugging/testing
+		results = append(results, *res)
 	}
 
 	slog.Info("Evaluation complete", "applicable_count", len(results))
@@ -108,36 +94,80 @@ func (s *ComputationService) calculateCartSummary(cart domain.Cart) *cartSummary
 }
 
 func (s *ComputationService) applyCouponLogic(cart domain.Cart, coupon domain.Coupon, summary *cartSummary) (*domain.ComputeResult, error) {
+	// 1. Validation Rules
+	if failure := s.validateRules(coupon); failure != nil {
+		return failure, nil
+	}
+
+	// 2. Determine Eligible Amount (Strategy based on Level)
+	eligibleAmount := s.calculateEligibleAmount(coupon, summary)
+
+	// 3. Min Order Check using eligible amount
+	if eligibleAmount < coupon.MinOrderAmount {
+		missing := coupon.MinOrderAmount - eligibleAmount
+		return &domain.ComputeResult{
+			Success:       false,
+			Message:       fmt.Sprintf("Add $%.2f more to apply this coupon", missing),
+			ReasonCode:    domain.ReasonMinOrderNotMet,
+			MissingAmount: missing,
+			CouponCode:    coupon.Code,
+			CouponID:      coupon.ID,
+		}, nil
+	}
+
+	// 4. Calculate Discount (Strategy based on Type)
+	discountAmount := s.calculateDiscount(coupon, eligibleAmount)
+
+	return &domain.ComputeResult{
+		Success:        true,
+		CouponID:       coupon.ID,
+		CouponCode:     coupon.Code,
+		DiscountAmount: discountAmount,
+		Message:        "Coupon applied successfully",
+		ReasonCode:     domain.ReasonSuccess,
+	}, nil
+}
+
+// -- Helpers --
+
+func (s *ComputationService) validateRules(coupon domain.Coupon) *domain.ComputeResult {
 	if !coupon.IsActive {
 		return &domain.ComputeResult{
-			Success: false,
-			Message: "Coupon is inactive",
-		}, nil
+			Success:    false,
+			Message:    "Coupon is inactive",
+			ReasonCode: domain.ReasonInactive,
+			CouponCode: coupon.Code,
+			CouponID:   coupon.ID,
+		}
+	}
+
+	if coupon.ExpiryDate != nil && time.Now().After(*coupon.ExpiryDate) {
+		return &domain.ComputeResult{
+			Success:    false,
+			Message:    "Coupon has expired",
+			ReasonCode: domain.ReasonExpired,
+			CouponCode: coupon.Code,
+			CouponID:   coupon.ID,
+		}
 	}
 
 	if coupon.UsageLimit > 0 && coupon.UsageCount >= coupon.UsageLimit {
 		return &domain.ComputeResult{
-			Success: false,
-			Message: "Coupon usage limit exceeded",
-		}, nil
+			Success:    false,
+			Message:    "Coupon usage limit exceeded",
+			ReasonCode: domain.ReasonUsageLimitExceeded,
+			CouponCode: coupon.Code,
+			CouponID:   coupon.ID,
+		}
 	}
 
-	var discountAmount float64
-	var reason string = "Coupon applied successfully"
-	var success = true
+	return nil
+}
 
+func (s *ComputationService) calculateEligibleAmount(coupon domain.Coupon, summary *cartSummary) float64 {
 	if coupon.Level == domain.LevelCart {
-		if summary.totalCartAmount < coupon.MinOrderAmount {
-			reason = "Insufficient cart amount for coupon application"
-			success = false
-		} else if coupon.Type == domain.DiscountTypePercentage {
-			rawDiscount := (coupon.DiscountAmount / 100) * summary.totalCartAmount
-			discountAmount = math.Min(rawDiscount, coupon.MaxDiscount)
-		} else {
-			discountAmount = coupon.DiscountAmount
-		}
+		return summary.totalCartAmount
 	} else if coupon.Level == domain.LevelTag {
-		// Logic for tag level
 		uniqueProductIds := make(map[string]struct{})
 		for _, tag := range coupon.ApplicableTags {
 			lowerTag := strings.ToLower(tag)
@@ -146,35 +176,28 @@ func (s *ComputationService) applyCouponLogic(cart domain.Cart, coupon domain.Co
 			}
 		}
 
-		var totalTagLevelAmount float64 = 0
+		var total float64
 		for pid := range uniqueProductIds {
-			totalTagLevelAmount += summary.productIdPrice[pid]
+			total += summary.productIdPrice[pid]
 		}
+		return total
+	}
+	return 0
+}
 
-		if totalTagLevelAmount < coupon.MinOrderAmount {
-			reason = "Insufficient cart amount for eligible items"
-			success = false
-		} else if coupon.Type == domain.DiscountTypePercentage {
-			rawDiscount := (coupon.DiscountAmount / 100) * totalTagLevelAmount
-			discountAmount = math.Min(rawDiscount, coupon.MaxDiscount)
-		} else {
-			discountAmount = coupon.DiscountAmount
+func (s *ComputationService) calculateDiscount(coupon domain.Coupon, eligibleAmount float64) float64 {
+	var discount float64
+	if coupon.Type == domain.DiscountTypePercentage {
+		discount = (coupon.DiscountAmount / 100) * eligibleAmount
+		if coupon.MaxDiscount > 0 {
+			discount = math.Min(discount, coupon.MaxDiscount)
 		}
 	} else {
-		return nil, fmt.Errorf("unknown coupon level: %s", coupon.Level)
+		// Fixed amount
+		discount = coupon.DiscountAmount
 	}
-
-	if !success {
-		discountAmount = 0
-	}
-
-	return &domain.ComputeResult{
-		CouponID:       coupon.ID,
-		CouponCode:     coupon.Code,
-		DiscountAmount: discountAmount,
-		Message:        reason,
-		Success:        success,
-	}, nil
+	// Cannot exceed eligible amount (optional/business rule dependent, usually good practice)
+	return math.Min(discount, eligibleAmount)
 }
 
 func (s *ComputationService) CreateCoupon(c *domain.Coupon) error {

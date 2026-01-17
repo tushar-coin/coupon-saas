@@ -70,9 +70,7 @@
     "min_order_amount": 2000,
     "max_discount": 500,
     "applicable_tags": [
-      "electronics",
-      "tech",
-      "clothing"
+      "electronics"
     ],
     "is_active": true,
     "visible": false,
