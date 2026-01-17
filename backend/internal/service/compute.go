@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"math"
+	"strings"
 )
 
 type ComputationService struct {
@@ -96,7 +97,8 @@ func (s *ComputationService) calculateCartSummary(cart domain.Cart) *cartSummary
 
 	for _, item := range cart.Items {
 		for _, tag := range item.Tags {
-			summary.productsInCoupon[tag] = append(summary.productsInCoupon[tag], item.ItemID)
+			lowerTag := strings.ToLower(tag)
+			summary.productsInCoupon[lowerTag] = append(summary.productsInCoupon[lowerTag], item.ItemID)
 		}
 		itemTotal := item.Price * float64(item.Quantity)
 		summary.totalCartAmount += itemTotal
@@ -138,7 +140,8 @@ func (s *ComputationService) applyCouponLogic(cart domain.Cart, coupon domain.Co
 		// Logic for tag level
 		uniqueProductIds := make(map[string]struct{})
 		for _, tag := range coupon.ApplicableTags {
-			for _, pid := range summary.productsInCoupon[tag] {
+			lowerTag := strings.ToLower(tag)
+			for _, pid := range summary.productsInCoupon[lowerTag] {
 				uniqueProductIds[pid] = struct{}{}
 			}
 		}

@@ -135,21 +135,25 @@
 .stat-icon-wrapper.blue {
     background: var(--bg-blue-subtle);
     color: #3b82f6;
+    /* Keep or change to var(--primary) if meant to be brand blue, but since primary is now Gold, keep blue for specific 'blue' stats or change to var(--info) if exists. Let's start by using hardcoded for now or if I want to align with gold. Actually, 'blue' class implies blue color. I will keep it but maybe it should be 'primary' in the HTML? I will leave as is but ensure background matches generic subtle. */
+    color: #60A5FA;
+    /* Lighter blue for dark mode visibility */
 }
 
 .stat-icon-wrapper.green {
     background: var(--bg-green-subtle);
-    color: #10b981;
+    color: var(--success);
 }
 
 .stat-icon-wrapper.purple {
     background: var(--bg-purple-subtle);
-    color: #8b5cf6;
+    color: #A78BFA;
+    /* Lighter purple */
 }
 
 .stat-icon-wrapper.orange {
     background: var(--bg-orange-subtle);
-    color: #f97316;
+    color: var(--warning);
 }
 
 .stat-value {

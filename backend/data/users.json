@@ -1,5 +1,16 @@
 [
   {
+    "id": "34a5ee96-d29b-4ab7-9247-faee6df78be4",
+    "email": "tusharBairi597@gmail.com",
+    "org_id": "01945ff4-e863-4a99-8a26-f5176eaa92b0",
+    "org_name": "BurgerKing",
+    "role": "member",
+    "logo_url": "",
+    "password_hash": "$2a$10$Q4zwMy314kKYc3j6uU81aOfBurBbON4v0zqc6fdUx9pdOdcpK2duG",
+    "created_at": "2026-01-15T15:47:47.5773443+05:30",
+    "email_verified": true
+  },
+  {
     "id": "7743d1f3-f9fc-4a8b-8249-2779afc55f72",
     "email": "rajandhimantravel597@gmail.com",
     "org_id": "",
@@ -77,6 +88,17 @@
     "email_verified": false
   },
   {
+    "id": "02b6ffe0-0c8f-4aa4-8df0-9241bbd288c5",
+    "email": "rajandhimantravel597@gmail.com",
+    "org_id": "01945ff4-e863-4a99-8a26-f5176eaa92b0",
+    "org_name": "BurgerKing",
+    "role": "owner",
+    "logo_url": "http://localhost:8081/uploads/02b6ffe0-0c8f-4aa4-8df0-9241bbd288c5_logo.png",
+    "password_hash": "$2a$10$iYNd7qoH3GpUUc2q4TMVqOv9Kv3Avkp4ypFnKM1GevsqbdJoqOH4a",
+    "created_at": "2026-01-15T15:31:22.1675241+05:30",
+    "email_verified": true
+  },
+  {
     "id": "596393f6-5791-4514-8f5a-e2806e140a04",
     "email": "rajan597@gmail.com",
     "org_id": "",
@@ -106,27 +128,5 @@
     "logo_url": "http://localhost:8081/uploads/5f7982bc-2fe1-430a-b0f4-7a6bd212bb4a_logo.png",
     "created_at": "2026-01-15T13:56:26.4346473+05:30",
     "email_verified": false
-  },
-  {
-    "id": "02b6ffe0-0c8f-4aa4-8df0-9241bbd288c5",
-    "email": "rajandhimantravel597@gmail.com",
-    "org_id": "01945ff4-e863-4a99-8a26-f5176eaa92b0",
-    "org_name": "BurgerKing",
-    "role": "owner",
-    "logo_url": "http://localhost:8081/uploads/02b6ffe0-0c8f-4aa4-8df0-9241bbd288c5_logo.png",
-    "password_hash": "$2a$10$iYNd7qoH3GpUUc2q4TMVqOv9Kv3Avkp4ypFnKM1GevsqbdJoqOH4a",
-    "created_at": "2026-01-15T15:31:22.1675241+05:30",
-    "email_verified": true
-  },
-  {
-    "id": "34a5ee96-d29b-4ab7-9247-faee6df78be4",
-    "email": "tusharBairi597@gmail.com",
-    "org_id": "01945ff4-e863-4a99-8a26-f5176eaa92b0",
-    "org_name": "BurgerKing",
-    "role": "member",
-    "logo_url": "",
-    "password_hash": "$2a$10$Q4zwMy314kKYc3j6uU81aOfBurBbON4v0zqc6fdUx9pdOdcpK2duG",
-    "created_at": "2026-01-15T15:47:47.5773443+05:30",
-    "email_verified": true
   }
 ]

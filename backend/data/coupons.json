@@ -80,5 +80,26 @@
     "usage_count": 0,
     "expiry_date": "2026-01-23T06:30:00Z",
     "created_at": "2026-01-17T01:32:09.2113559+05:30"
+  },
+  {
+    "id": "6ff6cda2-95ac-4970-90f7-d0f6149b1af3",
+    "org_name": "MuscleBlaze",
+    "code": "NewCoupon120",
+    "description": "Checking coupon flows ",
+    "type": "percentage",
+    "level": "tag_level",
+    "discount_amount": 50,
+    "min_order_amount": 250,
+    "max_discount": 100,
+    "applicable_tags": [
+      "electronics",
+      "fruits"
+    ],
+    "is_active": true,
+    "visible": true,
+    "usage_limit": 50,
+    "usage_count": 0,
+    "expiry_date": "2026-01-22T06:30:00Z",
+    "created_at": "2026-01-17T23:02:34.8718688+05:30"
   }
 ]
