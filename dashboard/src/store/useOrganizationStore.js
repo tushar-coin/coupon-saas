@@ -1,6 +1,5 @@
 import { create } from 'zustand';
-
-const API_URL = 'http://localhost:8081/api/v1';
+import { API_URL } from '../config/api';
 
 const useOrganizationStore = create((set, get) => ({
   organization: null,

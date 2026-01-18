@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Eye, EyeOff } from "lucide-react";
 import useAuthStore from "../store/useAuthStore";
-import PasswordInput from "../components/PasswordInput";
-import "../styles/Auth.css";
+import ReceiptLayout from "../components/auth/ReceiptLayout";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -15,18 +14,19 @@ export default function Register() {
     orgName: ""
   });
 
+  const [showPassword, setShowPassword] = useState(false);
+  const [isTearingOff, setIsTearingOff] = useState(false);
   const [validationErrors, setValidationErrors] = useState({});
 
-  // Real-time validation
   const validateField = (name, value) => {
     const errors = { ...validationErrors };
     
     switch (name) {
       case "orgName":
         if (value.length < 2) {
-          errors.orgName = "Organization name must be at least 2 characters";
+          errors.orgName = "Min 2 characters";
         } else if (value.length > 50) {
-          errors.orgName = "Organization name must be less than 50 characters";
+          errors.orgName = "Max 50 characters";
         } else {
           delete errors.orgName;
         }
@@ -34,14 +34,14 @@ export default function Register() {
       case "email":
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(value)) {
-          errors.email = "Please enter a valid email address";
+          errors.email = "Invalid email format";
         } else {
           delete errors.email;
         }
         break;
       case "password":
         if (value.length < 8) {
-          errors.password = "Password must be at least 8 characters";
+          errors.password = "Min 8 characters";
         } else {
           delete errors.password;
         }
@@ -62,100 +62,128 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Final validation before submit
     if (formData.password.length < 8) {
-      setValidationErrors({ ...validationErrors, password: "Password must be at least 8 characters" });
+      setValidationErrors({ ...validationErrors, password: "Min 8 characters" });
       return;
     }
 
     const success = await register(formData.email, formData.password, formData.orgName);
     if (success) {
-      navigate("/login");
+      setIsTearingOff(true);
     }
   };
 
+  const handleTearOffComplete = () => {
+    navigate("/login");
+  };
+
   return (
-    <div className="auth-container">
-      <div className="auth-card glass">
-        <h2 className="auth-title">Create Organization</h2>
-        <p className="auth-subtitle">Get started with CouponFlow today</p>
+    <ReceiptLayout 
+      isTearingOff={isTearingOff} 
+      onTearOff={handleTearOffComplete}
+    >
+      {error && (
+        <div className="receipt-error">
+          <AlertCircle size={14} />
+          <span>{error}</span>
+        </div>
+      )}
+
+      <form className="receipt-form" onSubmit={handleSubmit}>
+        {/* Organization Field */}
+        <div className="receipt-field">
+          <label className="receipt-label">Organization</label>
+          <input 
+            type="text"
+            name="orgName"
+            className="receipt-input"
+            placeholder="e.g. Acme Corp" 
+            required
+            value={formData.orgName}
+            onChange={handleChange}
+            onBlur={(e) => validateField("orgName", e.target.value)}
+          />
+          {validationErrors.orgName && (
+            <span className="receipt-field-error">{validationErrors.orgName}</span>
+          )}
+        </div>
+
+        {/* Email Field */}
+        <div className="receipt-field">
+          <label className="receipt-label">Email Address</label>
+          <input 
+            type="email"
+            name="email"
+            className="receipt-input"
+            placeholder="merchant@acme.com" 
+            required
+            value={formData.email}
+            onChange={handleChange}
+            onBlur={(e) => validateField("email", e.target.value)}
+          />
+          {validationErrors.email && (
+            <span className="receipt-field-error">{validationErrors.email}</span>
+          )}
+        </div>
         
-        {error && (
-          <div className="auth-error">
-            <AlertCircle size={16} />
-            <span>{error}</span>
-          </div>
-        )}
-
-        <form className="auth-form" onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Organization Name</label>
+        {/* Password Field */}
+        <div className="receipt-field">
+          <label className="receipt-label">Password</label>
+          <div className="receipt-password-container">
             <input 
-              type="text" 
-              name="orgName"
-              className={`input ${validationErrors.orgName ? 'input-error' : ''}`}
-              placeholder="e.g. Acme Corp" 
+              type={showPassword ? "text" : "password"}
+              name="password"
+              className="receipt-input"
+              placeholder="Min. 8 characters"
               required
-              value={formData.orgName}
-              onChange={handleChange}
-              onBlur={(e) => validateField("orgName", e.target.value)}
-            />
-            {validationErrors.orgName && (
-              <span className="field-error">{validationErrors.orgName}</span>
-            )}
-          </div>
-
-          <div className="form-group">
-            <label>Email Address</label>
-            <input 
-              type="email"
-              name="email"
-              className={`input ${validationErrors.email ? 'input-error' : ''}`}
-              placeholder="merchant@acme.com" 
-              required
-              value={formData.email}
-              onChange={handleChange}
-              onBlur={(e) => validateField("email", e.target.value)}
-            />
-            {validationErrors.email && (
-              <span className="field-error">{validationErrors.email}</span>
-            )}
-          </div>
-          
-          <div className="form-group">
-            <label>Password</label>
-            <PasswordInput
+              minLength={8}
               value={formData.password}
-              onChange={(e) => {
-                setFormData({ ...formData, password: e.target.value });
-                validateField("password", e.target.value);
-              }}
-              placeholder="Create a strong password"
-              showStrength={true}
+              onChange={handleChange}
+              onBlur={(e) => validateField("password", e.target.value)}
+              style={{ paddingRight: '2.5rem' }}
             />
+            <button
+              type="button"
+              className="receipt-password-toggle"
+              onClick={() => setShowPassword(!showPassword)}
+              tabIndex={-1}
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
           </div>
+          {validationErrors.password && (
+            <span className="receipt-field-error">{validationErrors.password}</span>
+          )}
+        </div>
 
-          <button 
-             type="submit" 
-             className="btn-primary"
-             style={{ width: '100%', marginTop: '1rem' }}
-             disabled={isLoading || Object.keys(validationErrors).length > 0}
-          >
-            {isLoading ? (
-              <>
-                <span className="spinner"></span>
-                Creating Account...
-              </>
-            ) : (
-              "Create Account"
-            )}
-          </button>
-        </form>
-        
-        <p className="auth-footer">
-          Already have an account? <Link to="/login">Sign In</Link>
-        </p>
+        {/* Total Section with Submit */}
+        <div className="receipt-total-section">
+          <div className="receipt-total-row">
+            <span>NEW ACCOUNT</span>
+            <span>▸</span>
+          </div>
+        </div>
+
+        <button 
+          type="submit" 
+          className="receipt-submit"
+          disabled={isLoading || Object.keys(validationErrors).length > 0}
+        >
+          {isLoading ? (
+            <>
+              <span className="receipt-spinner"></span>
+              Creating...
+            </>
+          ) : (
+            "CREATE ORGANIZATION"
+          )}
+        </button>
+      </form>
+      
+      {/* Footer Links */}
+      <div className="receipt-links">
+        Already have an account? <Link to="/login">Sign In</Link>
       </div>
-    </div>
+    </ReceiptLayout>
   );
 }

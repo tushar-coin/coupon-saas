@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import "../styles/Auth.css";
-
-const API_URL = 'http://localhost:8081/api/v1/auth';
+import { CheckCircle, XCircle, Loader } from "lucide-react";
+import ReceiptLayout from "../components/auth/ReceiptLayout";
+import { API_AUTH } from '../config/api';
 
 export default function VerifyEmail() {
   const [searchParams] = useSearchParams();
@@ -30,7 +30,7 @@ export default function VerifyEmail() {
     // Call verification API
     const verifyEmail = async () => {
       try {
-        const response = await fetch(`${API_URL}/verify-email?token=${token}`);
+        const response = await fetch(`${API_AUTH}/verify-email?token=${token}`);
         
         if (response.ok) {
           setStatus("success");
@@ -49,36 +49,112 @@ export default function VerifyEmail() {
     verifyEmail();
   }, [token]);
 
-  return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <div className="auth-header">
-          <h1>Email Verification</h1>
-        </div>
-
-        {status === "verifying" && (
-          <div className="loading-message">
-            <p>⏳ Verifying your email...</p>
+  const getStatusIcon = () => {
+    switch (status) {
+      case "verifying":
+        return (
+          <div style={{ 
+            display: 'inline-flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            width: '48px',
+            height: '48px',
+            borderRadius: '50%',
+            backgroundColor: '#FEF3C7',
+            marginBottom: '1rem'
+          }}>
+            <Loader size={24} style={{ color: '#D97706', animation: 'receipt-spin 1s linear infinite' }} />
           </div>
-        )}
+        );
+      case "success":
+        return (
+          <div style={{ 
+            display: 'inline-flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            width: '48px',
+            height: '48px',
+            borderRadius: '50%',
+            backgroundColor: '#D1FAE5',
+            marginBottom: '1rem'
+          }}>
+            <CheckCircle size={24} style={{ color: '#059669' }} />
+          </div>
+        );
+      case "error":
+        return (
+          <div style={{ 
+            display: 'inline-flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            width: '48px',
+            height: '48px',
+            borderRadius: '50%',
+            backgroundColor: '#FEE2E2',
+            marginBottom: '1rem'
+          }}>
+            <XCircle size={24} style={{ color: '#DC2626' }} />
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  const getStatusTitle = () => {
+    switch (status) {
+      case "verifying": return "VERIFYING EMAIL";
+      case "success": return "EMAIL VERIFIED";
+      case "error": return "VERIFICATION FAILED";
+      default: return "";
+    }
+  };
+
+  return (
+    <ReceiptLayout>
+      <div style={{ textAlign: 'center', padding: '1rem 0' }}>
+        {getStatusIcon()}
+        
+        <h3 style={{ 
+          fontFamily: "'VT323', monospace", 
+          fontSize: '1.5rem', 
+          color: '#1A1A1A',
+          marginBottom: '0.5rem'
+        }}>
+          {getStatusTitle()}
+        </h3>
+        
+        <p style={{ 
+          fontSize: '0.8rem', 
+          color: '#6B7280',
+          marginBottom: '1.5rem',
+          fontFamily: "'Space Mono', monospace"
+        }}>
+          {status === "verifying" ? "Please wait..." : message}
+        </p>
 
         {status === "success" && (
-          <div className="success-message">
-            <p>✅ {message}</p>
-            <p>You can now access all features.</p>
+          <div style={{
+            background: '#F3F4F6',
+            padding: '0.75rem',
+            borderRadius: '4px',
+            marginBottom: '1.5rem',
+            fontFamily: "'Space Mono', monospace",
+            fontSize: '0.7rem',
+            color: '#4B5563'
+          }}>
+            ✅ You can now access all features
           </div>
         )}
-
-        {status === "error" && (
-          <div className="error-message">
-            <p>❌ {message}</p>
-          </div>
-        )}
-
-        <Link to="/login" className="btn-primary" style={{ display: 'block', textAlign: 'center', marginTop: '1.5rem' }}>
-          Go to Login
-        </Link>
       </div>
-    </div>
+
+      <Link 
+        to="/login" 
+        className="receipt-submit"
+        style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}
+      >
+        GO TO LOGIN
+      </Link>
+    </ReceiptLayout>
   );
 }

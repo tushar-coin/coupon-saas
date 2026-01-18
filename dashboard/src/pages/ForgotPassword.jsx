@@ -1,8 +1,8 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import "../styles/Auth.css";
-
-const API_URL = 'http://localhost:8081/api/v1/auth';
+import { AlertCircle, CheckCircle, Mail } from "lucide-react";
+import ReceiptLayout from "../components/auth/ReceiptLayout";
+import { API_AUTH } from '../config/api';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState("");
@@ -17,7 +17,7 @@ export default function ForgotPassword() {
     setError("");
 
     try {
-      const response = await fetch(`${API_URL}/forgot-password`, {
+      const response = await fetch(`${API_AUTH}/forgot-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, org_name: orgName }),
@@ -36,72 +36,128 @@ export default function ForgotPassword() {
     }
   };
 
+  // Success state - Email sent
   if (submitted) {
     return (
-      <div className="auth-container">
-        <div className="auth-card">
-          <div className="auth-header">
-            <h1>Check Your Email</h1>
-            <p>If an account exists with this email, we've sent password reset instructions.</p>
+      <ReceiptLayout>
+        <div style={{ textAlign: 'center', padding: '1rem 0' }}>
+          <div style={{ 
+            display: 'inline-flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            width: '48px',
+            height: '48px',
+            borderRadius: '50%',
+            backgroundColor: '#D1FAE5',
+            marginBottom: '1rem'
+          }}>
+            <Mail size={24} style={{ color: '#059669' }} />
           </div>
           
-          <div className="success-message">
-            <p>📧 Check your inbox (and spam folder)</p>
-            <p>The reset link expires in 15 minutes.</p>
-          </div>
+          <h3 style={{ 
+            fontFamily: "'VT323', monospace", 
+            fontSize: '1.5rem', 
+            color: '#1A1A1A',
+            marginBottom: '0.5rem'
+          }}>
+            CHECK YOUR INBOX
+          </h3>
+          
+          <p style={{ 
+            fontSize: '0.8rem', 
+            color: '#6B7280',
+            marginBottom: '1.5rem',
+            fontFamily: "'Space Mono', monospace"
+          }}>
+            If an account exists with this email,<br/>
+            we've sent password reset instructions.
+          </p>
 
-          <Link to="/login" className="btn-primary" style={{ display: 'block', textAlign: 'center', marginTop: '1rem' }}>
-            Return to Login
-          </Link>
+          <div style={{
+            background: '#F3F4F6',
+            padding: '0.75rem',
+            borderRadius: '4px',
+            marginBottom: '1.5rem',
+            fontFamily: "'Space Mono', monospace",
+            fontSize: '0.7rem',
+            color: '#4B5563'
+          }}>
+            📧 Check spam folder • Link expires in 15 min
+          </div>
         </div>
-      </div>
+
+        <Link 
+          to="/login" 
+          className="receipt-submit"
+          style={{ display: 'block', textAlign: 'center', textDecoration: 'none' }}
+        >
+          RETURN TO LOGIN
+        </Link>
+      </ReceiptLayout>
     );
   }
 
+  // Form state
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <div className="auth-header">
-          <h1>Forgot Password</h1>
-          <p>Enter your email and organization to receive a reset link</p>
+    <ReceiptLayout>
+      {error && (
+        <div className="receipt-error">
+          <AlertCircle size={14} />
+          <span>{error}</span>
+        </div>
+      )}
+
+      <form className="receipt-form" onSubmit={handleSubmit}>
+        {/* Organization Field */}
+        <div className="receipt-field">
+          <label className="receipt-label">Organization</label>
+          <input
+            type="text"
+            className="receipt-input"
+            value={orgName}
+            onChange={(e) => setOrgName(e.target.value)}
+            placeholder="Enter your organization"
+            required
+          />
         </div>
 
-        {error && <div className="error-message">{error}</div>}
-
-        <form onSubmit={handleSubmit} className="auth-form">
-          <div className="form-group">
-            <label htmlFor="orgName">Organization Name</label>
-            <input
-              id="orgName"
-              type="text"
-              value={orgName}
-              onChange={(e) => setOrgName(e.target.value)}
-              placeholder="Enter your organization"
-              required
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="email">Email Address</label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="Enter your email"
-              required
-            />
-          </div>
-
-          <button type="submit" className="btn-primary" disabled={isLoading}>
-            {isLoading ? "Sending..." : "Send Reset Link"}
-          </button>
-        </form>
-
-        <div className="auth-footer">
-          <p>Remember your password? <Link to="/login">Sign In</Link></p>
+        {/* Email Field */}
+        <div className="receipt-field">
+          <label className="receipt-label">Email Address</label>
+          <input
+            type="email"
+            className="receipt-input"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email"
+            required
+          />
         </div>
+
+        {/* Total Section */}
+        <div className="receipt-total-section">
+          <div className="receipt-total-row">
+            <span>RESET REQUEST</span>
+            <span>▸</span>
+          </div>
+        </div>
+
+        <button type="submit" className="receipt-submit" disabled={isLoading}>
+          {isLoading ? (
+            <>
+              <span className="receipt-spinner"></span>
+              Sending...
+            </>
+          ) : (
+            "SEND RESET LINK"
+          )}
+        </button>
+      </form>
+
+      {/* Footer Links */}
+      <div className="receipt-links">
+        Remember your password? <Link to="/login">Sign In</Link>
       </div>
-    </div>
+    </ReceiptLayout>
   );
 }

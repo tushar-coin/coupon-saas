@@ -1,10 +1,8 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, Link, useNavigate } from "react-router-dom";
-import { UserCheck, Building2, Shield, AlertCircle } from "lucide-react";
-import PasswordInput from "../components/PasswordInput";
-import "../styles/Auth.css";
-
-const API_URL = 'http://localhost:8081/api/v1/team';
+import { UserCheck, AlertCircle, Eye, EyeOff, Shield } from "lucide-react";
+import ReceiptLayout from "../components/auth/ReceiptLayout";
+import { API_TEAM } from '../config/api';
 
 export default function AcceptInvitation() {
   const [searchParams] = useSearchParams();
@@ -13,9 +11,12 @@ export default function AcceptInvitation() {
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+  const [isTearingOff, setIsTearingOff] = useState(false);
 
   useEffect(() => {
     if (!token) {
@@ -40,7 +41,7 @@ export default function AcceptInvitation() {
     setIsLoading(true);
 
     try {
-      const res = await fetch(`${API_URL}/accept-invitation`, {
+      const res = await fetch(`${API_TEAM}/accept-invitation`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, password })
@@ -48,7 +49,7 @@ export default function AcceptInvitation() {
 
       if (res.ok) {
         setSuccess(true);
-        setTimeout(() => navigate("/login"), 3000);
+        setIsTearingOff(true);
       } else {
         const err = await res.text();
         setError(err || "Failed to accept invitation");
@@ -60,79 +61,154 @@ export default function AcceptInvitation() {
     }
   };
 
+  const handleTearOffComplete = () => {
+    navigate("/login");
+  };
+
+  // Success state
   if (success) {
     return (
-      <div className="auth-container">
-        <div className="auth-card glass">
-          <div className="success-icon">
-            <UserCheck size={48} />
+      <ReceiptLayout isTearingOff={isTearingOff} onTearOff={handleTearOffComplete}>
+        <div style={{ textAlign: 'center', padding: '1rem 0' }}>
+          <div style={{ 
+            display: 'inline-flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            width: '48px',
+            height: '48px',
+            borderRadius: '50%',
+            backgroundColor: '#D1FAE5',
+            marginBottom: '1rem'
+          }}>
+            <UserCheck size={24} style={{ color: '#059669' }} />
           </div>
-          <h2 className="auth-title">Welcome to the Team!</h2>
-          <p className="auth-subtitle">Your account has been created successfully.</p>
-          <div className="success-message">
-            <p>✅ Redirecting to login...</p>
-          </div>
+          
+          <h3 style={{ 
+            fontFamily: "'VT323', monospace", 
+            fontSize: '1.5rem', 
+            color: '#1A1A1A',
+            marginBottom: '0.5rem'
+          }}>
+            WELCOME TO THE TEAM!
+          </h3>
+          
+          <p style={{ 
+            fontSize: '0.8rem', 
+            color: '#6B7280',
+            marginBottom: '1.5rem',
+            fontFamily: "'Space Mono', monospace"
+          }}>
+            Your account has been created successfully.
+          </p>
         </div>
-      </div>
+      </ReceiptLayout>
     );
   }
 
   return (
-    <div className="auth-container">
-      <div className="auth-card glass">
-        <div className="invite-icon">
-          <Building2 size={32} />
+    <ReceiptLayout>
+      {error && (
+        <div className="receipt-error">
+          <AlertCircle size={14} />
+          <span>{error}</span>
         </div>
-        <h2 className="auth-title">Join Your Team</h2>
-        <p className="auth-subtitle">Create your account to accept this invitation</p>
+      )}
 
-        {error && (
-          <div className="auth-error">
-            <AlertCircle size={16} />
-            <span>{error}</span>
-          </div>
-        )}
+      {/* Verified note */}
+      <div style={{
+        background: '#F0FDF4',
+        border: '1px solid #BBF7D0',
+        borderRadius: '4px',
+        padding: '0.75rem',
+        marginBottom: '1rem',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '0.5rem',
+        fontFamily: "'Space Mono', monospace",
+        fontSize: '0.7rem',
+        color: '#166534'
+      }}>
+        <Shield size={14} />
+        <span>Email pre-verified via invitation</span>
+      </div>
 
-        <form className="auth-form" onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label>Password</label>
-            <PasswordInput
+      <form className="receipt-form" onSubmit={handleSubmit}>
+        {/* Password */}
+        <div className="receipt-field">
+          <label className="receipt-label">Create Password</label>
+          <div className="receipt-password-container">
+            <input
+              type={showPassword ? "text" : "password"}
+              className="receipt-input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Create a password"
-              showStrength={true}
+              placeholder="Min. 8 characters"
+              minLength={8}
+              required
+              disabled={!token}
+              style={{ paddingRight: '2.5rem' }}
             />
+            <button
+              type="button"
+              className="receipt-password-toggle"
+              onClick={() => setShowPassword(!showPassword)}
+              tabIndex={-1}
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
           </div>
+        </div>
 
-          <div className="form-group">
-            <label>Confirm Password</label>
-            <PasswordInput
+        {/* Confirm Password */}
+        <div className="receipt-field">
+          <label className="receipt-label">Confirm Password</label>
+          <div className="receipt-password-container">
+            <input
+              type={showConfirm ? "text" : "password"}
+              className="receipt-input"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm password"
-              showStrength={false}
+              placeholder="Re-enter password"
+              minLength={8}
+              required
+              disabled={!token}
+              style={{ paddingRight: '2.5rem' }}
             />
+            <button
+              type="button"
+              className="receipt-password-toggle"
+              onClick={() => setShowConfirm(!showConfirm)}
+              tabIndex={-1}
+            >
+              {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
           </div>
+        </div>
 
-          <div className="invite-note">
-            <Shield size={14} />
-            <span>Your email has been pre-verified through this invitation</span>
+        {/* Total Section */}
+        <div className="receipt-total-section">
+          <div className="receipt-total-row">
+            <span>JOIN TEAM</span>
+            <span>▸</span>
           </div>
+        </div>
 
-          <button 
-            type="submit" 
-            className="btn-primary"
-            style={{ width: '100%', marginTop: '1rem' }}
-            disabled={isLoading || !token}
-          >
-            {isLoading ? "Creating Account..." : "Accept Invitation"}
-          </button>
-        </form>
+        <button type="submit" className="receipt-submit" disabled={isLoading || !token}>
+          {isLoading ? (
+            <>
+              <span className="receipt-spinner"></span>
+              Creating...
+            </>
+          ) : (
+            "ACCEPT INVITATION"
+          )}
+        </button>
+      </form>
 
-        <p className="auth-footer">
-          Already have an account? <Link to="/login">Sign In</Link>
-        </p>
+      {/* Footer Links */}
+      <div className="receipt-links">
+        Already have an account? <Link to="/login">Sign In</Link>
       </div>
-    </div>
+    </ReceiptLayout>
   );
 }

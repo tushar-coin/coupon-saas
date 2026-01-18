@@ -8,7 +8,7 @@ const Toast = forwardRef((props, ref) => {
 
   useImperativeHandle(ref, () => ({
     addToast: (message, type = "info", duration = 3000) => {
-      const id = crypto.randomUUID();
+      const id = Date.now().toString(36) + Math.random().toString(36).substr(2);
       setToasts((prev) => [...prev, { id, message, type, duration }]);
       
       if (duration > 0) {

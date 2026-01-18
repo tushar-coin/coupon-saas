@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
-import "../styles/Auth.css";
-
-const API_URL = 'http://localhost:8081/api/v1/auth';
+import { AlertCircle, Eye, EyeOff, CheckCircle } from "lucide-react";
+import ReceiptLayout from "../components/auth/ReceiptLayout";
+import { API_AUTH } from '../config/api';
 
 export default function ResetPassword() {
   const [searchParams] = useSearchParams();
@@ -11,6 +11,8 @@ export default function ResetPassword() {
 
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -38,7 +40,7 @@ export default function ResetPassword() {
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_URL}/reset-password`, {
+      const response = await fetch(`${API_AUTH}/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, new_password: password }),
@@ -58,71 +60,132 @@ export default function ResetPassword() {
     }
   };
 
+  // Success state
   if (success) {
     return (
-      <div className="auth-container">
-        <div className="auth-card">
-          <div className="auth-header">
-            <h1>Password Reset Successful!</h1>
-            <p>Your password has been updated.</p>
+      <ReceiptLayout>
+        <div style={{ textAlign: 'center', padding: '1rem 0' }}>
+          <div style={{ 
+            display: 'inline-flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            width: '48px',
+            height: '48px',
+            borderRadius: '50%',
+            backgroundColor: '#D1FAE5',
+            marginBottom: '1rem'
+          }}>
+            <CheckCircle size={24} style={{ color: '#059669' }} />
           </div>
           
-          <div className="success-message">
-            <p>✅ Redirecting to login...</p>
-          </div>
+          <h3 style={{ 
+            fontFamily: "'VT323', monospace", 
+            fontSize: '1.5rem', 
+            color: '#1A1A1A',
+            marginBottom: '0.5rem'
+          }}>
+            PASSWORD UPDATED
+          </h3>
+          
+          <p style={{ 
+            fontSize: '0.8rem', 
+            color: '#6B7280',
+            marginBottom: '1.5rem',
+            fontFamily: "'Space Mono', monospace"
+          }}>
+            ✅ Redirecting to login...
+          </p>
         </div>
-      </div>
+      </ReceiptLayout>
     );
   }
 
   return (
-    <div className="auth-container">
-      <div className="auth-card">
-        <div className="auth-header">
-          <h1>Reset Password</h1>
-          <p>Enter your new password</p>
+    <ReceiptLayout>
+      {error && (
+        <div className="receipt-error">
+          <AlertCircle size={14} />
+          <span>{error}</span>
         </div>
+      )}
 
-        {error && <div className="error-message">{error}</div>}
-
-        <form onSubmit={handleSubmit} className="auth-form">
-          <div className="form-group">
-            <label htmlFor="password">New Password</label>
+      <form className="receipt-form" onSubmit={handleSubmit}>
+        {/* New Password */}
+        <div className="receipt-field">
+          <label className="receipt-label">New Password</label>
+          <div className="receipt-password-container">
             <input
-              id="password"
-              type="password"
+              type={showPassword ? "text" : "password"}
+              className="receipt-input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="Enter new password"
               minLength={8}
               required
               disabled={!token}
+              style={{ paddingRight: '2.5rem' }}
             />
+            <button
+              type="button"
+              className="receipt-password-toggle"
+              onClick={() => setShowPassword(!showPassword)}
+              tabIndex={-1}
+            >
+              {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
           </div>
+        </div>
 
-          <div className="form-group">
-            <label htmlFor="confirmPassword">Confirm Password</label>
+        {/* Confirm Password */}
+        <div className="receipt-field">
+          <label className="receipt-label">Confirm Password</label>
+          <div className="receipt-password-container">
             <input
-              id="confirmPassword"
-              type="password"
+              type={showConfirm ? "text" : "password"}
+              className="receipt-input"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="Confirm new password"
               minLength={8}
               required
               disabled={!token}
+              style={{ paddingRight: '2.5rem' }}
             />
+            <button
+              type="button"
+              className="receipt-password-toggle"
+              onClick={() => setShowConfirm(!showConfirm)}
+              tabIndex={-1}
+            >
+              {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+            </button>
           </div>
-
-          <button type="submit" className="btn-primary" disabled={isLoading || !token}>
-            {isLoading ? "Resetting..." : "Reset Password"}
-          </button>
-        </form>
-
-        <div className="auth-footer">
-          <p>Need a new link? <Link to="/forgot-password">Request Reset</Link></p>
         </div>
+
+        {/* Total Section */}
+        <div className="receipt-total-section">
+          <div className="receipt-total-row">
+            <span>PASSWORD RESET</span>
+            <span>▸</span>
+          </div>
+        </div>
+
+        <button type="submit" className="receipt-submit" disabled={isLoading || !token}>
+          {isLoading ? (
+            <>
+              <span className="receipt-spinner"></span>
+              Resetting...
+            </>
+          ) : (
+            "RESET PASSWORD"
+          )}
+        </button>
+      </form>
+
+      {/* Footer Links */}
+      <div className="receipt-links">
+        Need a new link? <Link to="/forgot-password">Request Reset</Link>
       </div>
-    </div>
+    </ReceiptLayout>
   );
 }

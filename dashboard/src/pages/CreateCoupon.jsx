@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { ArrowLeft, Check, ChevronRight, Tag, DollarSign, FileText, Calendar, ShoppingCart, Layers } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import confetti from "canvas-confetti";
+
 import { z } from "zod"; // Zod for validation
 
 import ProgressBar from "../components/ui/ProgressBar";
@@ -215,30 +215,35 @@ export default function CreateCoupon() {
   const prevStep = () => setStep((s) => Math.max(s - 1, 1));
 
   // FINAL SUBMIT
+  const [isSubmitting, setIsSubmitting] = useState(false); // Prevent double submit
+  
   const handleSubmit = async (e) => {
     e?.preventDefault();
     if (step !== 3) return;
+    if (isSubmitting) return; // Prevent double submit
+    
+    setIsSubmitting(true);
+    console.log("Starting submission...");
     
     try {
       if (isEditMode) {
         await updateCoupon(id, formData);
-        toastRef.current.addToast("Coupon updated successfully!", "success");
+        console.log("Coupon updated successfully");
+        toastRef.current?.addToast("Coupon updated successfully!", "success");
       } else {
         await addCoupon(formData);
-        toastRef.current.addToast("Coupon created successfully!", "success");
+        console.log("Coupon created successfully");
+        toastRef.current?.addToast("Coupon created successfully!", "success");
         
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 },
-          colors: ['#4F46E5', '#7C3AED', '#EC4899', '#F59E0B']
-        });
+        // Removed confetti to isolate navigation issue
       }
 
-      setTimeout(() => navigate("/coupons"), 1500);
+      console.log("Navigating to /coupons...");
+      navigate("/coupons");
     } catch (error) {
-      // Show the actual error from the API
-      toastRef.current.addToast(error.message || "Failed to create coupon", "error");
+      console.error("Submission error:", error);
+      toastRef.current?.addToast(error.message || "Failed to create coupon", "error");
+      setIsSubmitting(false); // Re-enable on error
     }
   };
 
@@ -529,6 +534,7 @@ export default function CreateCoupon() {
                 variant="primary"
                 icon={Check}
                 onClick={handleSubmit}
+                loading={isSubmitting}
               >
                 {isEditMode ? "Update Coupon" : "Create Coupon"}
               </Button>

@@ -6,8 +6,7 @@ import useToastStore from "../store/useToastStore";
 import CustomSelect from "../components/CustomSelect";
 import ConfirmModal from "../components/ConfirmModal";
 import "../styles/Team.css";
-
-const API_URL = 'http://localhost:8081/api/v1/team';
+import { API_TEAM } from '../config/api';
 
 const roleOptions = [
   { value: 'admin', label: 'Admin', description: 'Can manage team & coupons' },
@@ -28,10 +27,10 @@ export default function Team() {
   const fetchTeamData = async () => {
     try {
       const [membersRes, invitesRes] = await Promise.all([
-        fetch(`${API_URL}/members`, {
+        fetch(`${API_TEAM}/members`, {
           headers: { 'Authorization': `Bearer ${token}` }
         }),
-        canInvite() ? fetch(`${API_URL}/invitations`, {
+        canInvite() ? fetch(`${API_TEAM}/invitations`, {
           headers: { 'Authorization': `Bearer ${token}` }
         }) : Promise.resolve({ ok: true, json: () => [] })
       ]);
@@ -58,7 +57,7 @@ export default function Team() {
 
   const handleRemoveMember = async (userId) => {
     try {
-      const res = await fetch(`${API_URL}/members/${userId}`, {
+      const res = await fetch(`${API_TEAM}/members/${userId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -77,7 +76,7 @@ export default function Team() {
 
   const handleRoleChange = async (userId, newRole) => {
     try {
-      const res = await fetch(`${API_URL}/members/${userId}/role`, {
+      const res = await fetch(`${API_TEAM}/members/${userId}/role`, {
         method: 'PUT',
         headers: { 
           'Authorization': `Bearer ${token}`,
@@ -102,7 +101,7 @@ export default function Team() {
 
   const handleCancelInvitation = async (invitationId) => {
     try {
-      const res = await fetch(`${API_URL}/invitations/${invitationId}`, {
+      const res = await fetch(`${API_TEAM}/invitations/${invitationId}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });
@@ -331,7 +330,7 @@ function InviteModal({ onClose, onSuccess }) {
 
     try {
       const token = localStorage.getItem('auth_token');
-      const res = await fetch(`${API_URL}/invite`, {
+      const res = await fetch(`${API_TEAM}/invite`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,

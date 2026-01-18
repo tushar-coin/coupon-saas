@@ -6,6 +6,7 @@ import (
 	"encoding/hex"
 	"errors"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"coupon-backend/internal/domain"
@@ -29,12 +30,14 @@ const (
 type AuthService struct {
 	userRepo ports.UserRepository
 	orgRepo  ports.OrganizationRepository
+	mailer   *MailerService
 }
 
-func NewAuthService(userRepo ports.UserRepository, orgRepo ports.OrganizationRepository) *AuthService {
+func NewAuthService(userRepo ports.UserRepository, orgRepo ports.OrganizationRepository, mailer *MailerService) *AuthService {
 	return &AuthService{
 		userRepo: userRepo,
 		orgRepo:  orgRepo,
+		mailer:   mailer,
 	}
 }
 
@@ -97,7 +100,10 @@ func (s *AuthService) Register(req domain.RegisterRequest) (*domain.User, *domai
 
 	// 7. Send Verification Email
 	verifyURL := fmt.Sprintf("http://localhost:5173/verify-email?token=%s", verifyToken)
-	SendEmail(req.Email, "Verify Your Email", fmt.Sprintf("Click here to verify: %s", verifyURL))
+	emailBody := GetVerifyEmailTemplate(verifyURL)
+
+	slog.Info("🚀 Triggering verification email", "to", req.Email)
+	go s.mailer.Send(req.Email, "Verify Your Email - CouponFlow", emailBody)
 
 	return user, org, nil
 }
@@ -195,7 +201,8 @@ func (s *AuthService) RequestPasswordReset(email, orgName string) error {
 	}
 
 	resetURL := fmt.Sprintf("http://localhost:5173/reset-password?token=%s", resetToken)
-	SendEmail(email, "Password Reset", fmt.Sprintf("Click here to reset your password: %s", resetURL))
+	emailBody := GetResetPasswordTemplate(resetURL)
+	go s.mailer.Send(email, "Password Reset Request - CouponFlow", emailBody)
 
 	return nil
 }
@@ -284,13 +291,4 @@ func generateSecureToken(length int) string {
 func hashToken(token string) string {
 	hash := sha256.Sum256([]byte(token))
 	return hex.EncodeToString(hash[:])
-}
-
-// Simple email sender (Console Log for development)
-func SendEmail(to, subject, body string) {
-	fmt.Printf("\n========== EMAIL ==========\n")
-	fmt.Printf("To: %s\n", to)
-	fmt.Printf("Subject: %s\n", subject)
-	fmt.Printf("Body: %s\n", body)
-	fmt.Printf("============================\n\n")
 }

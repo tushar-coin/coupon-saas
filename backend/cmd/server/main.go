@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/joho/godotenv"
+
 	"coupon-backend/internal/handler"
 	"coupon-backend/internal/repository/jsonrepo"
 	"coupon-backend/internal/service"
@@ -14,6 +16,16 @@ import (
 func main() {
 	// 0. Initialize Logger
 	logger.InitLogger()
+
+	// Load .env
+	if err := godotenv.Load(); err != nil {
+		slog.Warn("⚠️  .env file not found or failed to load. Using system env vars.")
+	}
+
+	// Load .env
+	if err := godotenv.Load(); err != nil {
+		slog.Warn("⚠️  .env file not found or failed to load. Using system env vars.")
+	}
 
 	// 1. Initialize Repositories
 	dataDir := "./data"
@@ -27,9 +39,22 @@ func main() {
 	inviteRepo := jsonrepo.NewFileInvitationRepository(dataDir + "/invitations.json")
 
 	// 2. Initialize Services
+	// Email Config
+	smtpHost := os.Getenv("SMTP_HOST")
+	smtpPort := os.Getenv("SMTP_PORT")
+	smtpEmail := os.Getenv("SMTP_EMAIL")
+	smtpPass := os.Getenv("SMTP_PASSWORD")
+
+	// Helper to warn if mailer is not configured
+	if smtpHost == "" || smtpEmail == "" {
+		slog.Warn("⚠️  SMTP Config missing! Emails will fail to send.")
+	}
+
+	mailerSvc := service.NewMailerService(smtpHost, smtpPort, smtpEmail, smtpPass)
+
 	computeSvc := service.NewComputationService(couponRepo)
-	authSvc := service.NewAuthService(userRepo, orgRepo)
-	teamSvc := service.NewTeamService(userRepo, orgRepo, inviteRepo)
+	authSvc := service.NewAuthService(userRepo, orgRepo, mailerSvc)
+	teamSvc := service.NewTeamService(userRepo, orgRepo, inviteRepo, mailerSvc)
 
 	// 3. Initialize Handlers
 	h := handler.NewHandler(computeSvc)

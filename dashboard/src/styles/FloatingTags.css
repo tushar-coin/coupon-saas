@@ -1,0 +1,210 @@
+/* Floating Discount Tags Animation */
+
+.floating-tags-container {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1;
+    /* Mask to hide tags over center receipt area */
+    mask-image: linear-gradient(to right,
+            rgba(0, 0, 0, 1) 0%,
+            rgba(0, 0, 0, 1) 25%,
+            rgba(0, 0, 0, 0) 35%,
+            rgba(0, 0, 0, 0) 65%,
+            rgba(0, 0, 0, 1) 75%,
+            rgba(0, 0, 0, 1) 100%);
+    -webkit-mask-image: linear-gradient(to right,
+            rgba(0, 0, 0, 1) 0%,
+            rgba(0, 0, 0, 1) 25%,
+            rgba(0, 0, 0, 0) 35%,
+            rgba(0, 0, 0, 0) 65%,
+            rgba(0, 0, 0, 1) 75%,
+            rgba(0, 0, 0, 1) 100%);
+}
+
+/* Dark mode adjustments */
+[data-theme='dark'] .floating-tag,
+[data-theme='dark'] .floating-tag-motion {
+    filter: brightness(0.9) saturate(1.1);
+    /* Slightly dim but vibrant */
+    opacity: 0.6;
+    /* Slight reduction for mood */
+}
+
+/* Base tag styles */
+.floating-tag {
+    position: absolute;
+    padding: 0.75rem 1.25rem;
+    font-family: 'Space Mono', 'Courier New', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    white-space: nowrap;
+    animation: float-down var(--duration) linear infinite;
+    animation-delay: var(--delay);
+    opacity: 0;
+    transform: rotate(var(--rotation));
+}
+
+/* Framer Motion version - no CSS animation, handled by JS */
+.floating-tag-motion {
+    position: absolute;
+    display: inline-block;
+    width: fit-content;
+    padding: 0.9rem 1.5rem;
+    font-family: 'Space Mono', 'Courier New', monospace;
+    font-size: 1.15rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+/* ===== ENHANCED REALISTIC COUPON STYLES ===== */
+
+/* Percentage tag style (Gold) - Classic coupon with serrated edge */
+.floating-tag.percent,
+.floating-tag-motion.percent {
+    background: linear-gradient(145deg, #F5E6A3 0%, #E8D48B 50%, #D4AF37 100%);
+    color: #8B6914;
+    border-radius: 6px;
+    border: 2px dashed #C9A227;
+    box-shadow:
+        0 4px 12px rgba(212, 175, 55, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    position: relative;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+
+/* Serrated left edge for percent tags */
+.floating-tag-motion.percent::before {
+    content: '';
+    position: absolute;
+    left: -2px;
+    top: 0;
+    bottom: 0;
+    width: 8px;
+    background: repeating-linear-gradient(0deg,
+            transparent,
+            transparent 4px,
+            #FAFAF8 4px,
+            #FAFAF8 8px);
+    border-radius: 6px 0 0 6px;
+}
+
+/* Dollar off tag style (Green) - Ticket style with punched holes */
+.floating-tag.dollar,
+.floating-tag-motion.dollar {
+    background: linear-gradient(145deg, #6EE7B7 0%, #34D399 50%, #10B981 100%);
+    color: #064E3B;
+    border-radius: 8px;
+    border: 2px dashed #059669;
+    box-shadow:
+        0 4px 12px rgba(16, 185, 129, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.2);
+    position: relative;
+}
+
+/* Punched holes on both sides for dollar tags */
+.floating-tag-motion.dollar::before,
+.floating-tag-motion.dollar::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+    background: #FAFAF8;
+    border-radius: 50%;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.floating-tag-motion.dollar::before {
+    left: -5px;
+}
+
+.floating-tag-motion.dollar::after {
+    right: -5px;
+}
+
+/* Save tag style (Red/Coral) - Price tag with string hole */
+.floating-tag.save,
+.floating-tag-motion.save {
+    background: linear-gradient(145deg, #FCA5A5 0%, #F87171 50%, #EF4444 100%);
+    color: #7F1D1D;
+    border-radius: 4px 12px 12px 4px;
+    border: 2px dashed #DC2626;
+    padding-left: 2rem;
+    box-shadow:
+        0 4px 12px rgba(239, 68, 68, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.2);
+    position: relative;
+}
+
+/* String hole for save tags */
+.floating-tag.save::before,
+.floating-tag-motion.save::before {
+    content: '';
+    position: absolute;
+    left: 0.6rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 10px;
+    height: 10px;
+    background: #FAFAF8;
+    border-radius: 50%;
+    border: 2px solid #B91C1C;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
+}
+
+/* Deal tag style (Purple) - Star burst effect */
+.floating-tag.deal,
+.floating-tag-motion.deal {
+    background: linear-gradient(145deg, #C4B5FD 0%, #A78BFA 50%, #8B5CF6 100%);
+    color: #4C1D95;
+    border-radius: 8px;
+    border: 3px solid #7C3AED;
+    box-shadow:
+        0 4px 12px rgba(139, 92, 246, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5),
+        0 0 0 2px rgba(139, 92, 246, 0.2);
+    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Leaf-fall animation with sway and wobble */
+@keyframes float-down {
+    0% {
+        transform: translateY(-60px) translateX(0) rotate(var(--rotation));
+        opacity: 0;
+    }
+
+    8% {
+        opacity: var(--opacity);
+    }
+
+    /* Sway cycle 1 - move in initial direction */
+    25% {
+        transform: translateY(25vh) translateX(calc(var(--sway) * var(--sway-dir))) rotate(calc(var(--rotation) + var(--wobble)));
+    }
+
+    /* Sway cycle 1 - swing back */
+    50% {
+        transform: translateY(50vh) translateX(calc(var(--sway) * var(--sway-dir) * -0.8)) rotate(calc(var(--rotation) - var(--wobble)));
+    }
+
+    /* Sway cycle 2 - smaller swing */
+    75% {
+        transform: translateY(75vh) translateX(calc(var(--sway) * var(--sway-dir) * 0.5)) rotate(calc(var(--rotation) + var(--wobble) * 0.5));
+    }
+
+    92% {
+        opacity: var(--opacity);
+    }
+
+    100% {
+        transform: translateY(calc(100vh + 60px)) translateX(calc(var(--sway) * var(--sway-dir) * -0.2)) rotate(var(--rotation));
+        opacity: 0;
+    }
+}

@@ -1,6 +1,5 @@
 import { create } from 'zustand';
-
-const API_URL = 'http://localhost:8081/api/v1/dashboard';
+import { API_DASHBOARD } from '../config/api';
 
 const useCouponStore = create((set, get) => ({
   coupons: [],
@@ -13,7 +12,7 @@ const useCouponStore = create((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const token = localStorage.getItem('auth_token');
-      const response = await fetch(`${API_URL}/coupons`, {
+      const response = await fetch(`${API_DASHBOARD}/coupons`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       
@@ -76,7 +75,7 @@ const useCouponStore = create((set, get) => ({
         'Authorization': `Bearer ${token}` 
       };
 
-      const response = await fetch(`${API_URL}/coupons`, {
+      const response = await fetch(`${API_DASHBOARD}/coupons`, {
         method: 'POST',
         headers: headers,
         body: JSON.stringify(payload),
@@ -87,8 +86,7 @@ const useCouponStore = create((set, get) => ({
         throw new Error(errorText || 'Failed to create coupon');
       }
       
-      // Refresh list after add
-      get().initialize();
+      // No need to initialize here, Coupons page checks on mount
       
     } catch (err) {
       console.error(err);
@@ -122,7 +120,7 @@ const useCouponStore = create((set, get) => ({
       };
 
       const token = localStorage.getItem('auth_token');
-      const response = await fetch(`${API_URL}/coupons/${id}`, {
+      const response = await fetch(`${API_DASHBOARD}/coupons/${id}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -136,8 +134,7 @@ const useCouponStore = create((set, get) => ({
         throw new Error(errorText || 'Failed to update coupon');
       }
 
-      // Refresh list
-      get().initialize();
+      // No need to initialize here
       
     } catch (err) {
       console.error(err);
@@ -156,7 +153,7 @@ const useCouponStore = create((set, get) => ({
 
     try {
       const token = localStorage.getItem('auth_token');
-      const response = await fetch(`${API_URL}/coupons/${id}`, {
+      const response = await fetch(`${API_DASHBOARD}/coupons/${id}`, {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${token}` }
       });

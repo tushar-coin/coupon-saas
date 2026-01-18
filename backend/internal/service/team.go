@@ -3,6 +3,7 @@ package service
 import (
 	"errors"
 	"fmt"
+	"log/slog"
 	"time"
 
 	"coupon-backend/internal/domain"
@@ -18,17 +19,20 @@ type TeamService struct {
 	userRepo   ports.UserRepository
 	orgRepo    ports.OrganizationRepository
 	inviteRepo ports.InvitationRepository
+	mailer     *MailerService
 }
 
 func NewTeamService(
 	userRepo ports.UserRepository,
 	orgRepo ports.OrganizationRepository,
 	inviteRepo ports.InvitationRepository,
+	mailer *MailerService,
 ) *TeamService {
 	return &TeamService{
 		userRepo:   userRepo,
 		orgRepo:    orgRepo,
 		inviteRepo: inviteRepo,
+		mailer:     mailer,
 	}
 }
 
@@ -73,12 +77,12 @@ func (s *TeamService) InviteUser(orgID, orgName, inviterID, email, role string) 
 		return nil, err
 	}
 
-	// Send invitation email (console log for now)
+	// Send invitation email
 	inviteURL := fmt.Sprintf("http://localhost:5173/accept-invite?token=%s", token)
-	SendEmail(email, "You're Invited!", fmt.Sprintf(
-		"You've been invited to join %s as %s.\n\nClick here to accept: %s",
-		orgName, role, inviteURL,
-	))
+	emailBody := GetInvitationTemplate(orgName, role, inviteURL)
+
+	slog.Info("🚀 Triggering invitation email", "to", email, "org", orgName)
+	go s.mailer.Send(email, "You're Invited! - CouponFlow", emailBody)
 
 	return invitation, nil
 }
