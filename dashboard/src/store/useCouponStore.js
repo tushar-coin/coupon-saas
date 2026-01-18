@@ -168,19 +168,61 @@ const useCouponStore = create((set, get) => ({
     }
   },
 
-  toggleStatus: (id) => {
-      // TODO: Call API to toggle is_active
-      console.warn("Toggle Status not synced with backend");
-      set((state) => {
-      const updatedCoupons = state.coupons.map((c) => {
-        if (c.id === id) {
-          const newStatus = c.status === 'Active' ? 'Paused' : 'Active';
-          return { ...c, status: newStatus };
-        }
-        return c;
-      });
-      return { coupons: updatedCoupons };
-    });
+  toggleStatus: async (id) => {
+      const coupon = get().coupons.find(c => c.id === id);
+      if (!coupon) return;
+
+      const newStatus = coupon.status === 'Active' ? 'Paused' : 'Active';
+      const isActive = newStatus === 'Active';
+
+      // 1. Optimistic Update
+      set((state) => ({
+          coupons: state.coupons.map(c => c.id === id ? { ...c, status: newStatus } : c)
+      }));
+
+      try {
+          const token = localStorage.getItem('auth_token');
+          // Construct payload based on current coupon data
+          const payload = {
+            id: coupon.id,
+            code: coupon.code,
+            description: coupon.description,
+            type: coupon.type.toLowerCase(),
+            discount_amount: Number(coupon.value),
+            max_discount: Number(coupon.maxDiscount || 0),
+            level: coupon.level || "cart_level",
+            applicable_tags: coupon.applicableTags || [],
+            min_order_amount: Number(coupon.minOrder || 0),
+            visible: coupon.visible,
+            is_active: isActive, // The key change
+            usage_limit: Number(coupon.usageLimit || 0),
+            expiry_date: coupon.expiryDate,
+            // Ensure organization is handled if needed by backend check, 
+            // but usually UpdateCoupon relies on ID and auth token org context
+          };
+
+          const response = await fetch(`${API_DASHBOARD}/coupons/${id}`, {
+              method: 'PUT',
+              headers: { 
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}` 
+              },
+              body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) {
+             const errText = await response.text();
+             throw new Error(errText || "Failed to update status");
+          }
+          
+      } catch (err) {
+          console.error("Toggle status failed:", err);
+          // Revert on failure
+          set((state) => ({
+              coupons: state.coupons.map(c => c.id === id ? { ...c, status: coupon.status } : c)
+          }));
+          set({ error: "Failed to update status. Please try again." });
+      }
   },
 
   getCouponById: (id) => {

@@ -1,19 +1,20 @@
-import { useState } from "react";
+import { useState, forwardRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import "./FloatingLabelInput.css";
 
-export default function FloatingLabelInput({
+const FloatingLabelInput = forwardRef(({
   label,
   type = "text",
   name,
   value,
   onChange,
+  onBlur,
   error,
   icon: Icon,
   required = false,
   className = "",
   ...props
-}) {
+}, ref) => {
   const [isFocused, setIsFocused] = useState(false);
   const hasValue = value && value.toString().length > 0;
   const isFloating = isFocused || hasValue;
@@ -33,12 +34,16 @@ export default function FloatingLabelInput({
 
         <div className="input-field-wrapper">
           <input
+            ref={ref}
             type={type}
             name={name}
             value={value}
             onChange={onChange}
             onFocus={() => setIsFocused(true)}
-            onBlur={() => setIsFocused(false)}
+            onBlur={(e) => {
+              setIsFocused(false);
+              onBlur && onBlur(e);
+            }}
             className="floating-input"
             placeholder=" " // Required for CSS :placeholder-shown
             {...props}
@@ -79,4 +84,8 @@ export default function FloatingLabelInput({
       </AnimatePresence>
     </div>
   );
-}
+});
+
+FloatingLabelInput.displayName = "FloatingLabelInput";
+
+export default FloatingLabelInput;

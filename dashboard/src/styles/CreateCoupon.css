@@ -466,3 +466,48 @@
         grid-template-columns: 1fr;
     }
 }
+
+/* Mobile Optimizations */
+@media (max-width: 768px) {
+    .create-coupon-container {
+        padding: 0 1rem;
+    }
+
+    .form-card {
+        padding: 1.25rem;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 1.25rem;
+    }
+
+    /* Steps: Hide title, show only bubbles for cleaner look */
+    .step-title {
+        display: none;
+    }
+
+    .step-line {
+        width: 2rem;
+        margin: 0 0.5rem;
+    }
+
+    /* Buttons: Full width and stack */
+    .form-actions {
+        flex-direction: column-reverse;
+        gap: 1rem;
+    }
+
+    .form-actions button {
+        width: 100%;
+    }
+
+    /* Toggle visibility cards */
+    .visibility-monitor {
+        gap: 0.75rem;
+    }
+
+    .radio-card {
+        padding: 0.75rem;
+    }
+}

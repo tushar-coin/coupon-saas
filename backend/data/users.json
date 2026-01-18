@@ -1,51 +1,5 @@
 [
   {
-    "id": "c08c112e-35d7-4ffd-b2c0-466050aa8098",
-    "email": "king@gamil.com",
-    "org_id": "bac7e48a-3f67-4292-b907-9815017b42ca",
-    "org_name": "king",
-    "role": "owner",
-    "logo_url": "",
-    "password_hash": "$2a$10$QHvfGQCtXC1nwyopEURxs.iYnxy3zzJcooxTz/8dxH6w.1.j4u8JG",
-    "created_at": "2026-01-18T01:33:13.9217002+05:30",
-    "email_verified": false,
-    "verification_token": "5ec3c51239774ac0a3436ecc337f082f567d0aaa288d7b594a967ce323268974",
-    "verification_expiry": "2026-01-19T01:33:13.9217002+05:30",
-    "reset_token_used": true
-  },
-  {
-    "id": "12ac7341-906f-42f5-8226-d316a557faa3",
-    "email": "rajandhimantravel597@gmail.com",
-    "org_id": "9f61577f-0158-42b4-a183-e8055537ec08",
-    "org_name": "MuscleBlaze",
-    "role": "admin",
-    "logo_url": "",
-    "password_hash": "$2a$10$b.hrI6wyqQ6GnbRtTlu8luDhXEoJXvBlE1ksuQLKtzNakm.6dzEIm",
-    "created_at": "2026-01-18T15:43:57.4749399+05:30",
-    "email_verified": true
-  },
-  {
-    "id": "66fb2b26-dd3f-4229-8204-b59d44958f51",
-    "email": "rajaninvest597@gmail.com",
-    "org_id": "aebe1085-86be-435a-baeb-d5844a05fe0f",
-    "org_name": "HealthKart",
-    "role": "owner",
-    "logo_url": "",
-    "password_hash": "$2a$10$7z7RWHgc1RHIGO5kGdtagu.rR7KB3Xd1eMhQZ0fQ6dDh0302WYebi",
-    "created_at": "2026-01-17T00:17:15.5313763+05:30",
-    "email_verified": true
-  },
-  {
-    "id": "596393f6-5791-4514-8f5a-e2806e140a04",
-    "email": "rajan597@gmail.com",
-    "org_id": "",
-    "org_name": "Rajan",
-    "role": "",
-    "logo_url": "http://localhost:8081/uploads/596393f6-5791-4514-8f5a-e2806e140a04_logo.png",
-    "created_at": "2026-01-15T13:37:00.043128+05:30",
-    "email_verified": false
-  },
-  {
     "id": "ac506fd7-7e60-4f89-b369-4fe05952ee59",
     "email": "rajandhiman597@gmail.com",
     "org_id": "",
@@ -225,5 +179,51 @@
     "password_hash": "$2a$10$6O1UZq5DEy8ELtq64FxRKuj/Ma2mO1HAadFWZERdU1B12T8BJvnjm",
     "created_at": "2026-01-18T00:24:32.3897254+05:30",
     "email_verified": true
+  },
+  {
+    "id": "c08c112e-35d7-4ffd-b2c0-466050aa8098",
+    "email": "king@gamil.com",
+    "org_id": "bac7e48a-3f67-4292-b907-9815017b42ca",
+    "org_name": "king",
+    "role": "owner",
+    "logo_url": "",
+    "password_hash": "$2a$10$QHvfGQCtXC1nwyopEURxs.iYnxy3zzJcooxTz/8dxH6w.1.j4u8JG",
+    "created_at": "2026-01-18T01:33:13.9217002+05:30",
+    "email_verified": false,
+    "verification_token": "5ec3c51239774ac0a3436ecc337f082f567d0aaa288d7b594a967ce323268974",
+    "verification_expiry": "2026-01-19T01:33:13.9217002+05:30",
+    "reset_token_used": true
+  },
+  {
+    "id": "12ac7341-906f-42f5-8226-d316a557faa3",
+    "email": "rajandhimantravel597@gmail.com",
+    "org_id": "9f61577f-0158-42b4-a183-e8055537ec08",
+    "org_name": "MuscleBlaze",
+    "role": "admin",
+    "logo_url": "",
+    "password_hash": "$2a$10$b.hrI6wyqQ6GnbRtTlu8luDhXEoJXvBlE1ksuQLKtzNakm.6dzEIm",
+    "created_at": "2026-01-18T15:43:57.4749399+05:30",
+    "email_verified": true
+  },
+  {
+    "id": "66fb2b26-dd3f-4229-8204-b59d44958f51",
+    "email": "rajaninvest597@gmail.com",
+    "org_id": "aebe1085-86be-435a-baeb-d5844a05fe0f",
+    "org_name": "HealthKart",
+    "role": "owner",
+    "logo_url": "",
+    "password_hash": "$2a$10$7z7RWHgc1RHIGO5kGdtagu.rR7KB3Xd1eMhQZ0fQ6dDh0302WYebi",
+    "created_at": "2026-01-17T00:17:15.5313763+05:30",
+    "email_verified": true
+  },
+  {
+    "id": "596393f6-5791-4514-8f5a-e2806e140a04",
+    "email": "rajan597@gmail.com",
+    "org_id": "",
+    "org_name": "Rajan",
+    "role": "",
+    "logo_url": "http://localhost:8081/uploads/596393f6-5791-4514-8f5a-e2806e140a04_logo.png",
+    "created_at": "2026-01-15T13:37:00.043128+05:30",
+    "email_verified": false
   }
 ]

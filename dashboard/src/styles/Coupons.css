@@ -16,6 +16,24 @@
     flex-wrap: wrap;
 }
 
+@media (max-width: 768px) {
+    .toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .search-wrapper,
+    .actions-wrapper {
+        width: 100%;
+    }
+
+    .actions-wrapper {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        /* Equal width buttons */
+    }
+}
+
 .search-wrapper {
     position: relative;
     width: 300px;

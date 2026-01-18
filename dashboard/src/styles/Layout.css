@@ -244,6 +244,67 @@
     box-shadow: var(--shadow-sm);
 }
 
+/* ... previous code ... */
+
+/* Mobile Sidebar Overlay */
+.sidebar-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(2px);
+    z-index: 9;
+    animation: fadeIn 0.3s ease;
+}
+
+/* Mobile Sidebar Overrides */
+@media (max-width: 768px) {
+    .sidebar {
+        transform: translateX(0);
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar.collapsed {
+        transform: translateX(-100%);
+        width: 260px;
+        /* Keep full width when sliding out */
+    }
+
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 1rem;
+    }
+
+    .main-content.sidebar-collapsed {
+        margin-left: 0;
+    }
+
+    /* Hide desktop toggle on mobile */
+    .sidebar-toggle {
+        display: none;
+    }
+}
+
+/* Menu Toggle Button (Mobile Only) */
+.menu-toggle-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    cursor: pointer;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-md);
+}
+
+.menu-toggle-btn:hover {
+    background: var(--bg-hover);
+}
+
 /* Utility classes */
 .flex {
     display: flex;
@@ -255,4 +316,14 @@
 
 .gap-4 {
     gap: 1rem;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }

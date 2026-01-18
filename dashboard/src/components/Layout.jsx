@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
-import { Copy, Home, LogOut, Settings, LayoutDashboard, ChevronLeft, Moon, Sun, Users } from "lucide-react";
+import { Copy, Home, LogOut, Settings, LayoutDashboard, ChevronLeft, Moon, Sun, Users, Menu } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import "../styles/Layout.css";
 import useThemeStore from "../store/useThemeStore";
 import useAuthStore from "../store/useAuthStore";
+import { useMediaQuery } from "../hooks/useMediaQuery";
 
 const SIDEBAR_ITEMS = [
   { icon: Home, label: "Dashboard", path: "/dashboard" },
@@ -22,6 +23,15 @@ export default function Layout() {
   const { theme, toggleTheme } = useThemeStore();
   const { user, logout } = useAuthStore(); // Get User & Logout
 
+  const isMobile = useMediaQuery("(max-width: 768px)");
+
+  // Auto-close sidebar on route change (Mobile only)
+  useEffect(() => {
+    if (isMobile) {
+      setIsCollapsed(true);
+    }
+  }, [location.pathname, isMobile]);
+
   // Apply theme
   if (typeof document !== 'undefined') {
       document.documentElement.setAttribute('data-theme', theme);
@@ -34,8 +44,13 @@ export default function Layout() {
 
   return (
     <div className="layout">
+      {/* Mobile Overlay */}
+      {isMobile && !isCollapsed && (
+        <div className="sidebar-overlay" onClick={() => setIsCollapsed(true)} />
+      )}
+
       {/* Sidebar */}
-      <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+      <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''} ${isMobile ? 'mobile' : ''}`}>
         <div className="sidebar-header">
           <Link to="/" className="brand">
             <Copy size={28} />
@@ -159,16 +174,29 @@ export default function Layout() {
       </aside>
 
       {/* Main Content */}
-      <main className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''}`}>
+      <main className={`main-content ${isCollapsed ? 'sidebar-collapsed' : ''} ${isMobile ? 'mobile' : ''}`}>
         <header className="workspace-header">
-            <div>
-                 <h2 className="page-title">
-                    {location.pathname === "/dashboard" ? "Overview" : 
-                     location.pathname.includes("coupons") ? "Coupon Management" : 
-                     location.pathname.includes("team") ? "Team Management" : "Settings"}
-                 </h2>
-                 <p className="user-welcome">Welcome back, {user?.org_name || "Merchant"}</p>
+            <div className="flex items-center gap-4">
+                 {/* Mobile Menu Toggle */}
+                 {isMobile && (
+                   <button 
+                     className="menu-toggle-btn"
+                     onClick={() => setIsCollapsed(!isCollapsed)}
+                   >
+                     <Menu size={24} />
+                   </button>
+                 )}
+                 
+                 <div>
+                      <h2 className="page-title">
+                          {location.pathname === "/dashboard" ? "Overview" : 
+                          location.pathname.includes("coupons") ? "Coupon Management" : 
+                          location.pathname.includes("team") ? "Team Management" : "Settings"}
+                      </h2>
+                      <p className="user-welcome">Welcome back, {user?.org_name || "Merchant"}</p>
+                 </div>
             </div>
+            
             <div className="flex items-center gap-4">
                 <div className="user-avatar">
                     {user?.org_name ? user.org_name.charAt(0).toUpperCase() : "M"}

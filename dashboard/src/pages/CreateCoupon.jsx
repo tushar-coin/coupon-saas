@@ -28,7 +28,7 @@ const step1Schema = z.object({
   code: z
     .string()
     .min(3, "Code must be at least 3 characters")
-    .regex(/^[a-zA-Z0-9]+$/, "Code can only contain letters and numbers (no special characters like $ or spaces)"),
+    .regex(/^[a-zA-Z0-9]+$/, "Code can only contain letters and numbers (no spaces)"),
   type: z.enum(["Percentage", "Fixed"]),
   value: z.coerce
     .number({ invalid_type_error: "Value must be a number" })
@@ -47,7 +47,7 @@ const step1Schema = z.object({
 const step2Schema = z.object({
   minOrder: z.coerce
     .number()
-    .nonnegative("Minimum order cannot be negative") // explicitly checks >= 0
+    .nonnegative("Minimum order cannot be negative")
     .optional()
     .or(z.literal("")),
   usageLimit: z.coerce
@@ -76,9 +76,9 @@ export default function CreateCoupon() {
     description: "", 
     type: "Percentage", 
     value: "", 
-    maxDiscount: "",      // NEW: Max discount cap for percentage
-    level: "cart_level",  // NEW: cart_level or tag_level
-    applicableTags: [],   // NEW: Tags for tag_level coupons
+    maxDiscount: "",      
+    level: "cart_level",  
+    applicableTags: [],   
     minOrder: "", 
     usageLimit: "", 
     expiryDate: "", 
@@ -88,10 +88,26 @@ export default function CreateCoupon() {
   const [errors, setErrors] = useState({});
   const toastRef = useRef(null);
 
+  // Refs for focusing inputs on error
+  const inputRefs = {
+    code: useRef(null),
+    value: useRef(null),
+    minOrder: useRef(null),
+    usageLimit: useRef(null),
+  };
+
+  const focusFirstError = (currentErrors) => {
+    const firstField = Object.keys(currentErrors)[0];
+    if (inputRefs[firstField]?.current) {
+        inputRefs[firstField].current.focus();
+        inputRefs[firstField].current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
   // Initialize store if landing directly here
   useEffect(() => {
     initialize();
-    fetchOrganization(); // NEW: Fetch organization tags
+    fetchOrganization(); 
   }, [initialize, fetchOrganization]);
 
   // Load Data for Edit Mode
@@ -104,9 +120,9 @@ export default function CreateCoupon() {
           description: existingCoupon.description || "",
           type: existingCoupon.type,
           value: existingCoupon.value,
-          maxDiscount: existingCoupon.maxDiscount || "", // NEW
-          level: existingCoupon.level || "cart_level",  // NEW
-          applicableTags: existingCoupon.applicableTags || [], // NEW
+          maxDiscount: existingCoupon.maxDiscount || "", 
+          level: existingCoupon.level || "cart_level",  
+          applicableTags: existingCoupon.applicableTags || [], 
           minOrder: existingCoupon.minOrder || "",
           usageLimit: existingCoupon.usageLimit || "",
           expiryDate: existingCoupon.expiryDate || "",
@@ -137,8 +153,6 @@ export default function CreateCoupon() {
   // Real-time Validation on Blur
   const handleBlur = (e) => {
     const { name } = e.target;
-    // Don't validate if empty (optional fields) unless required? 
-    // Actually, for better UX, we validate against the schema:
     
     let result;
     if (step === 1) {
@@ -148,7 +162,8 @@ export default function CreateCoupon() {
     }
 
     if (result && !result.success) {
-       const fieldError = result.error.errors.find(err => err.path[0] === name);
+       const issues = result.error.errors || result.error.issues || [];
+       const fieldError = issues.find(err => err.path[0] === name);
        if (fieldError) {
           setErrors(prev => ({ ...prev, [name]: fieldError.message }));
        }
@@ -174,12 +189,14 @@ export default function CreateCoupon() {
           description: formData.description
         });
 
-        // Uniqueness Check (Only for New Coupons or if Code Changed)
+        // Uniqueness Check
         if (!isEditMode) {
           const codeExists = coupons.find(c => c.code.toLowerCase() === formData.code.toLowerCase());
           if (codeExists) {
-            setErrors(prev => ({ ...prev, code: "Here we go again... This code already exists." }));
-            toastRef.current.addToast("Coupon code matches existing coupon", "error");
+            const errorMsg = "This code already exists in your organization.";
+            setErrors(prev => ({ ...prev, code: errorMsg }));
+            toastRef.current.addToast(errorMsg, "error");
+            focusFirstError({ code: errorMsg });
             return false;
           }
         }
@@ -194,12 +211,14 @@ export default function CreateCoupon() {
     } catch (error) {
       if (error instanceof z.ZodError) {
         const fieldErrors = {};
-        error.errors.forEach(err => {
+        const issues = error.errors || error.issues || [];
+        
+        issues.forEach(err => {
           if (err.path[0]) fieldErrors[err.path[0]] = err.message;
         });
         setErrors(fieldErrors);
+        focusFirstError(fieldErrors);
         
-        // Show generic toast or specific if simple
         toastRef.current.addToast("Please fix the errors before proceeding", "error");
       }
       return false;
@@ -292,6 +311,7 @@ export default function CreateCoupon() {
           {step === 1 && (
             <div className="form-step">
               <FloatingLabelInput
+                ref={inputRefs.code}
                 label="Coupon Code"
                 name="code"
                 type="text"
@@ -325,6 +345,7 @@ export default function CreateCoupon() {
 
                 <div className="form-group">
                   <FloatingLabelInput
+                    ref={inputRefs.value}
                     label="Discount Value"
                     name="value"
                     type="number"
@@ -421,6 +442,7 @@ export default function CreateCoupon() {
           {step === 2 && (
             <div className="form-step">
               <FloatingLabelInput
+                ref={inputRefs.minOrder}
                 label="Minimum Order Amount ($)"
                 name="minOrder"
                 type="number"
@@ -434,6 +456,7 @@ export default function CreateCoupon() {
               <div className="form-row">
                 <div className="form-group">
                   <FloatingLabelInput
+                    ref={inputRefs.usageLimit}
                     label="Usage Limit (Total)"
                     name="usageLimit"
                     type="number"
