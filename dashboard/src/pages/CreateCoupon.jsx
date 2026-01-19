@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { ArrowLeft, Check, ChevronRight, Tag, DollarSign, FileText, Calendar, ShoppingCart, Layers } from "lucide-react";
+import { ArrowLeft, Check, ChevronRight, Tag, DollarSign, Percent, FileText, Calendar, ShoppingCart, Layers } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import { z } from "zod"; // Zod for validation
@@ -33,6 +33,11 @@ const step1Schema = z.object({
   value: z.coerce
     .number({ invalid_type_error: "Value must be a number" })
     .positive("Discount value must be greater than 0"),
+  maxDiscount: z.coerce
+    .number({ invalid_type_error: "Maximum discount must be a number" })
+    .positive("Maximum discount must be greater than 0")
+    .optional()
+    .or(z.literal("")),
   description: z.string().optional(),
 }).superRefine((data, ctx) => {
   if (data.type === "Percentage" && data.value > 100) {
@@ -42,24 +47,27 @@ const step1Schema = z.object({
       path: ["value"],
     });
   }
+  // maxDiscount is required when type is Percentage
+  if (data.type === "Percentage" && (!data.maxDiscount || data.maxDiscount === "")) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Maximum discount cap is required for percentage discounts",
+      path: ["maxDiscount"],
+    });
+  }
 });
 
 const step2Schema = z.object({
   minOrder: z.coerce
-    .number()
-    .nonnegative("Minimum order cannot be negative")
-    .optional()
-    .or(z.literal("")),
+    .number({ invalid_type_error: "Minimum order must be a number" })
+    .positive("Minimum order amount is required and must be greater than 0"),
   usageLimit: z.coerce
-    .number()
+    .number({ invalid_type_error: "Usage limit must be a number" })
     .int("Usage limit must be a whole number")
-    .nonnegative("Usage limit cannot be negative")
-    .optional()
-    .or(z.literal("")),
-  expiryDate: z.string().refine((val) => {
-    if (!val) return true; // Optional
+    .positive("Usage limit is required and must be greater than 0"),
+  expiryDate: z.string().min(1, "Expiry date is required").refine((val) => {
     return new Date(val) > new Date();
-  }, "Expiry date must be in the future").optional().or(z.literal(""))
+  }, "Expiry date must be in the future")
 });
 
 export default function CreateCoupon() {
@@ -135,10 +143,42 @@ export default function CreateCoupon() {
   // Handle Input Change
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    const newValue = type === "checkbox" ? checked : value;
+    
+    setFormData((prev) => {
+      const updatedData = {
+        ...prev,
+        [name]: newValue,
+      };
+      
+      // Re-validate value field when discount type changes and value exists
+      if (name === "type" && prev.value) {
+        const result = step1Schema.safeParse(updatedData);
+        if (!result.success) {
+          const issues = result.error.errors || result.error.issues || [];
+          const valueError = issues.find(err => err.path[0] === "value");
+          if (valueError) {
+            setErrors(prevErrors => ({ ...prevErrors, value: valueError.message }));
+          } else {
+            // Clear value error if validation passes
+            setErrors(prevErrors => {
+              const newErrors = { ...prevErrors };
+              delete newErrors.value;
+              return newErrors;
+            });
+          }
+        } else {
+          // Clear value error if validation passes
+          setErrors(prevErrors => {
+            const newErrors = { ...prevErrors };
+            delete newErrors.value;
+            return newErrors;
+          });
+        }
+      }
+      
+      return updatedData;
+    });
     
     // Clear error for this field immediately on change to improve UX
     if (errors[name]) {
@@ -186,6 +226,7 @@ export default function CreateCoupon() {
           code: formData.code,
           type: formData.type,
           value: formData.value,
+          maxDiscount: formData.maxDiscount,
           description: formData.description
         });
 
@@ -346,20 +387,20 @@ export default function CreateCoupon() {
                 <div className="form-group">
                   <FloatingLabelInput
                     ref={inputRefs.value}
-                    label="Discount Value"
+                    label={formData.type === "Percentage" ? "Percentage Value" : "Discount Value"}
                     name="value"
                     type="number"
                     value={formData.value}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    icon={DollarSign}
+                    icon={formData.type === "Percentage" ? Percent : DollarSign}
                     required
                     error={errors.value}
                   />
                 </div>
               </div>
 
-              {/* NEW: Maximum Discount Cap - Only for Percentage */}
+              {/* Maximum Discount Cap - Required for Percentage */}
               {formData.type === "Percentage" && (
                 <div className="form-group">
                   <FloatingLabelInput
@@ -368,10 +409,13 @@ export default function CreateCoupon() {
                     type="number"
                     value={formData.maxDiscount}
                     onChange={handleChange}
+                    onBlur={handleBlur}
                     icon={DollarSign}
+                    required
+                    error={errors.maxDiscount}
                   />
                   <span className="helper-text">
-                    Optional: Caps the maximum discount (e.g., 20% off, up to $50)
+                    Caps the maximum discount (e.g., 20% off, up to $50)
                   </span>
                 </div>
               )}
@@ -450,6 +494,7 @@ export default function CreateCoupon() {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 icon={DollarSign}
+                required
                 error={errors.minOrder}
               />
 
@@ -463,6 +508,7 @@ export default function CreateCoupon() {
                     value={formData.usageLimit}
                     onChange={handleChange}
                     onBlur={handleBlur}
+                    required
                     error={errors.usageLimit}
                   />
                 </div>
@@ -476,7 +522,7 @@ export default function CreateCoupon() {
                       }}
                       className="no-border"
                     />
-                    <label className="floating-mimic-label with-icon">Expiry Date & Time</label>
+                    <label className="floating-mimic-label with-icon">Expiry Date & Time <span className="required-indicator"> *</span></label>
                   </div>
                   {errors.expiryDate && <span className="error-text-sm">{errors.expiryDate}</span>}
                 </div>

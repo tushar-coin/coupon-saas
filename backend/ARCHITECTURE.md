@@ -433,3 +433,47 @@ if role != "owner" && role != "admin" {
     return
 }
 ```
+
+---
+
+## CI/CD Pipeline
+
+A GitHub Actions workflow automates building, testing, and containerizing the backend.
+
+```yaml
+name: CI
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24'
+      - name: Install dependencies
+        run: go mod download
+      - name: Run tests
+        run: go test ./...
+      - name: Build binary
+        run: go build -o server ./cmd/server
+      - name: Build Docker image
+        run: |
+          docker build -t coupon-saas-backend:${{ github.sha }} .
+      - name: Push Docker image
+        if: github.ref == 'refs/heads/main'
+        run: |
+          echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+          docker push coupon-saas-backend:${{ github.sha }}
+```
+
+## Testing Strategy
+
+- **Unit Tests**: Go tests for each package (`go test ./...`).
+- **Integration Tests**: Spin up the server with an in‑memory SQLite DB (or mock JSON repo) and run end‑to‑end API tests using **Postman/Newman** or **Go's net/http/httptest**.
+- **Coverage**: Enforce a minimum of 80 % code coverage; fail the CI if below.
+- **Static Analysis**: Run `golint` and `go vet` as part of the workflow.
+
+---
+

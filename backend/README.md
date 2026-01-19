@@ -2,15 +2,13 @@
 
 A Go-based REST API server for the CouponFlow coupon management platform.
 
-Demo link of Produt -> https://www.youtube.com/watch?v=WAMqwG1jpR0
-
 ## Tech Stack
 
-- **Go 1.24+** - Core language
-- **JWT (golang-jwt/v5)** - Authentication
-- **bcrypt** - Password hashing
-- **UUID** - Unique identifiers
-- **JSON Files** - Data persistence (development)
+- **Go 1.24+** – Core language
+- **JWT (golang-jwt/v5)** – Authentication
+- **bcrypt** – Password hashing
+- **UUID** – Unique identifiers
+- **JSON Files** – Simple data persistence (development)
 
 ## Quick Start
 
@@ -29,15 +27,15 @@ cd coupon-saas/backend
 # Install dependencies
 go mod download
 
-# Start the server
+# Run the server
 go run cmd/server/main.go
 ```
 
-The server runs at **http://localhost:8081**
+The server runs at **http://localhost:8081**.
 
 ## Project Structure
 
-```
+```text
 backend/
 ├── cmd/
 │   └── server/
@@ -107,25 +105,25 @@ backend/
 
 JWT tokens are used for authentication. Include in requests:
 
-```
+```http
 Authorization: Bearer <token>
 ```
 
 **Token Claims:**
-- `user_id` - User's unique ID
-- `org_id` - Organization ID
-- `org_name` - Organization name
-- `role` - User role (owner/admin/member)
-- `exp` - Expiry (24 hours)
+- `user_id` – User's unique ID
+- `org_id` – Organization ID
+- `org_name` – Organization name
+- `role` – User role (owner/admin/member)
+- `exp` – Expiry (24 hours)
 
 ## Security Features
 
 - ✅ Password hashing (bcrypt)
-- ✅ Account lockout (5 failed attempts → 15 min lock)
-- ✅ Email verification tokens (hashed, 24h expiry)
-- ✅ Password reset tokens (hashed, 15 min expiry)
-- ✅ Role-based access control
-- ✅ Multi-tenant isolation (org-scoped data)
+- ✅ Account lockout (5 failed attempts → 15 min lock)
+- ✅ Email verification tokens (hashed, 24 h expiry)
+- ✅ Password reset tokens (hashed, 15 min expiry)
+- ✅ Role‑based access control
+- ✅ Multi‑tenant isolation (org‑scoped data)
 
 ## Environment Variables
 
@@ -147,3 +145,15 @@ go test ./...
 # Format code
 go fmt ./...
 ```
+
+## Testing
+
+Unit tests are located alongside each package. Run `go test ./...` to execute all tests. The CI pipeline runs these tests on each push.
+
+## CI/CD Pipeline
+
+A GitHub Actions workflow builds the Go binary, runs tests, and on successful merges creates a Docker image and pushes it to the registry. See `.github/workflows/ci.yml` for details.
+
+## Deployment
+
+Deploy the Docker image to any container platform (e.g., AWS ECS, GCP Cloud Run). Ensure the `JWT_SECRET` environment variable is set and mount a persistent volume for the `data/` directory if you continue using JSON storage, or configure a database connection.
