@@ -7,8 +7,9 @@ import (
 
 	"github.com/joho/godotenv"
 
+	"coupon-backend/internal/db"
 	"coupon-backend/internal/handler"
-	"coupon-backend/internal/repository/jsonrepo"
+	"coupon-backend/internal/repository/postgres"
 	"coupon-backend/internal/service"
 	"coupon-backend/pkg/logger"
 )
@@ -22,21 +23,28 @@ func main() {
 		slog.Warn("⚠️  .env file not found or failed to load. Using system env vars.")
 	}
 
-	// Load .env
-	if err := godotenv.Load(); err != nil {
-		slog.Warn("⚠️  .env file not found or failed to load. Using system env vars.")
-	}
-
 	// 1. Initialize Repositories
-	dataDir := "./data"
-	if _, err := os.Stat(dataDir); os.IsNotExist(err) {
-		os.Mkdir(dataDir, 0755)
+
+	// Database Connection
+	dbURL := os.Getenv("DATABASE_URL")
+	if dbURL == "" {
+		slog.Error("DATABASE_URL environment variable is required")
+		os.Exit(1)
 	}
 
-	couponRepo := jsonrepo.NewFileCouponRepository(dataDir + "/coupons.json")
-	userRepo := jsonrepo.NewFileUserRepository(dataDir + "/users.json")
-	orgRepo := jsonrepo.NewFileOrganizationRepository(dataDir + "/organizations.json")
-	inviteRepo := jsonrepo.NewFileInvitationRepository(dataDir + "/invitations.json")
+	if err := db.Initialize(dbURL); err != nil {
+		slog.Error("Failed to connect to database", "error", err)
+		os.Exit(1)
+	}
+	defer db.Close()
+
+	pool := db.GetPool()
+
+	// Use Postgres Repositories
+	couponRepo := postgres.NewCouponRepository(pool)
+	userRepo := postgres.NewUserRepository(pool)
+	orgRepo := postgres.NewOrganizationRepository(pool)
+	inviteRepo := postgres.NewInvitationRepository(pool)
 
 	// 2. Initialize Services
 	// Email Config
@@ -115,7 +123,7 @@ func main() {
 
 	// 5. Start Server
 	port := ":8081"
-	slog.Info("🚀 Backend Server starting", "port", port, "data_dir", dataDir)
+	slog.Info("🚀 Backend Server starting", "port", port, "db", "postgres")
 
 	if err := http.ListenAndServe(port, handlerWithLogging); err != nil {
 		slog.Error("Server failed", "error", err)

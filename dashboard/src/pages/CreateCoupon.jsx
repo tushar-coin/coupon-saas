@@ -11,6 +11,7 @@ import Select from "../components/ui/Select";
 import DateTimePicker from "../components/ui/DateTimePicker";
 import Toast from "../components/ui/Toast"; // Toast notification
 import TagSelector from "../components/ui/TagSelector"; // NEW: Tag selector
+import { CURRENCY } from "../config/currency"; // Currency config
 
 import useCouponStore from "../store/useCouponStore";
 import useOrganizationStore from "../store/useOrganizationStore"; // NEW: Organization store
@@ -373,7 +374,7 @@ export default function CreateCoupon() {
                     <Select
                       options={[
                         { value: "Percentage", label: "Percentage (%)" },
-                        { value: "Fixed", label: "Fixed Amount ($)" }
+                        { value: "Fixed", label: `Fixed Amount (${CURRENCY.symbol})` }
                       ]}
                       value={formData.type}
                       onChange={(val) => handleChange({ target: { name: 'type', value: val } })}
@@ -387,13 +388,13 @@ export default function CreateCoupon() {
                 <div className="form-group">
                   <FloatingLabelInput
                     ref={inputRefs.value}
-                    label={formData.type === "Percentage" ? "Percentage Value" : "Discount Value"}
+                    label={formData.type === "Percentage" ? "Percentage Value" : `Percentage Value (${CURRENCY.symbol})`}
                     name="value"
                     type="number"
                     value={formData.value}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    icon={formData.type === "Percentage" ? Percent : DollarSign}
+                    icon={formData.type === "Percentage" ? Percent : CURRENCY.icon}
                     required
                     error={errors.value}
                   />
@@ -404,18 +405,18 @@ export default function CreateCoupon() {
               {formData.type === "Percentage" && (
                 <div className="form-group">
                   <FloatingLabelInput
-                    label="Maximum Discount Cap ($)"
+                    label={`Maximum Discount Cap (${CURRENCY.symbol})`}
                     name="maxDiscount"
                     type="number"
                     value={formData.maxDiscount}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    icon={DollarSign}
+                    icon={CURRENCY.icon}
                     required
                     error={errors.maxDiscount}
                   />
                   <span className="helper-text">
-                    Caps the maximum discount (e.g., 20% off, up to $50)
+                    Caps the maximum discount (e.g., 20% off, up to {CURRENCY.symbol}50)
                   </span>
                 </div>
               )}
@@ -487,13 +488,13 @@ export default function CreateCoupon() {
             <div className="form-step">
               <FloatingLabelInput
                 ref={inputRefs.minOrder}
-                label="Minimum Order Amount ($)"
+                label={`Minimum Order Amount (${CURRENCY.symbol})`}
                 name="minOrder"
                 type="number"
                 value={formData.minOrder}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                icon={DollarSign}
+                icon={CURRENCY.icon}
                 required
                 error={errors.minOrder}
               />

@@ -5,155 +5,118 @@ A Go-based REST API server for the CouponFlow coupon management platform.
 ## Tech Stack
 
 - **Go 1.24+** – Core language
+- **PostgreSQL 15+** – Primary Database (via Supabase)
+- **pgx/v5** – PostgreSQL driver & connection pooling
 - **JWT (golang-jwt/v5)** – Authentication
 - **bcrypt** – Password hashing
 - **UUID** – Unique identifiers
-- **JSON Files** – Simple data persistence (development)
 
 ## Quick Start
 
 ### Prerequisites
 
-- Go 1.24 or higher installed
+- Go 1.24+
 - Git
+- PostgreSQL Database (Local or Supabase)
 
 ### Setup
 
-```bash
-# Clone the repository
-git clone <repository-url>
-cd coupon-saas/backend
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd coupon-saas/backend
+   ```
 
-# Install dependencies
-go mod download
+2. **Configure Environment**
+   Create a `.env` file in the `backend/` directory:
+   ```bash
+   cp .env.example .env  # if available, otherwise create new
+   ```
+   Add your database credentials:
+   ```env
+   DATABASE_URL=postgres://user:password@host:port/dbname?sslmode=disable
+   # For Supabase Transaction Pooler (Session Mode recommended for migration, Transaction for app)
+   # DATABASE_URL=postgres://postgres:[YOUR-PASSWORD]@db.xxxxxxxx.supabase.co:5432/postgres
+   
+   JWT_SECRET=your-super-secret-key
+   
+   # SMTP Configuration (Optional, for emails)
+   SMTP_HOST=smtp.example.com
+   SMTP_PORT=587
+   SMTP_EMAIL=your-email@example.com
+   SMTP_PASSWORD=your-email-password
+   ```
 
-# Run the server
-go run cmd/server/main.go
-```
+3. **Install Dependencies**
+   ```bash
+   go mod download
+   ```
 
-The server runs at **http://localhost:8081**.
+4. **Run Migrations (Optional)**
+   The schema is managed via SQL files in `migrations/`. You can apply them manually or via a tool if set up.
+   ```bash
+   # Example manually applying schema
+   psql $DATABASE_URL -f migrations/001_initial_schema.sql
+   ```
+
+5. **Run the Server**
+   ```bash
+   go run cmd/server/main.go
+   ```
+   The server runs at **http://localhost:8081**.
 
 ## Project Structure
 
 ```text
 backend/
 ├── cmd/
-│   └── server/
-│       └── main.go          # Entry point, route registration
-├── data/                    # JSON data files (gitignored in prod)
-│   ├── users.json
-│   ├── organizations.json
-│   ├── coupons.json
-│   ├── invitations.json
-│   └── uploads/             # Logo uploads
+│   ├── server/
+│   │   └── main.go          # Entry point
+│   ├── migrate_data/        # One-off migration script (JSON -> Postgres)
+│   └── debug_login/         # Debugging tools
 ├── internal/
 │   ├── domain/              # Business entities
-│   │   ├── coupon.go
-│   │   ├── user.go
-│   │   ├── organization.go
-│   │   └── invitation.go
 │   ├── handler/             # HTTP handlers
-│   │   ├── http_handler.go  # Coupon endpoints
-│   │   ├── auth_handler.go  # Auth endpoints
-│   │   └── team_handler.go  # Team management
 │   ├── ports/               # Repository interfaces
-│   │   └── repository.go
-│   ├── repository/          # Data access layer
-│   │   └── jsonrepo/        # JSON file implementations
-│   └── service/             # Business logic
-│       ├── auth.go          # Authentication
-│       ├── compute.go       # Coupon logic
-│       └── team.go          # Team management
+│   ├── repository/
+│   │   └── postgres/        # PostgreSQL implementations (pgx)
+│   ├── service/             # Business logic
+│   └── db/                  # Database connection setup
+├── migrations/              # SQL Schema definitions
 └── go.mod
 ```
 
 ## API Endpoints
 
 ### Public Endpoints
-
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/` | Health check |
-| POST | `/api/v1/public/compute` | Compute coupon discount |
+| POST | `/api/v1/public/compute` | Compute discount |
 
 ### Auth Endpoints
-
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/api/v1/auth/register` | Create account + organization |
 | POST | `/api/v1/auth/login` | Login (returns JWT) |
 | GET | `/api/v1/auth/verify-email` | Verify email token |
-| POST | `/api/v1/auth/forgot-password` | Request password reset |
-| POST | `/api/v1/auth/reset-password` | Reset password with token |
-| POST | `/api/v1/auth/upload-logo` | Upload user/org logo |
 
-### Protected Endpoints (Require JWT)
-
+### Protected Endpoints (Require `Authorization: Bearer <token>`)
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/v1/dashboard/coupons` | List org coupons |
 | POST | `/api/v1/dashboard/coupons` | Create coupon |
-| POST | `/api/v1/team/invite` | Invite team member |
-| POST | `/api/v1/team/accept-invitation` | Accept invite |
-| GET | `/api/v1/team/members` | List team members |
-| GET | `/api/v1/team/invitations` | List pending invites |
-| PUT | `/api/v1/team/members/{id}/role` | Update member role |
-| DELETE | `/api/v1/team/members/{id}` | Remove member |
-| DELETE | `/api/v1/team/invitations/{id}` | Cancel invitation |
-
-## Authentication
-
-JWT tokens are used for authentication. Include in requests:
-
-```http
-Authorization: Bearer <token>
-```
-
-**Token Claims:**
-- `user_id` – User's unique ID
-- `org_id` – Organization ID
-- `org_name` – Organization name
-- `role` – User role (owner/admin/member)
-- `exp` – Expiry (24 hours)
+| START | `/api/v1/team/*` | Team management endpoints |
 
 ## Security Features
 
-- ✅ Password hashing (bcrypt)
-- ✅ Account lockout (5 failed attempts → 15 min lock)
-- ✅ Email verification tokens (hashed, 24 h expiry)
-- ✅ Password reset tokens (hashed, 15 min expiry)
-- ✅ Role‑based access control
-- ✅ Multi‑tenant isolation (org‑scoped data)
-
-## Environment Variables
-
-For production, set:
-
-```bash
-JWT_SECRET=your-super-secret-key-here
-```
-
-## Development
-
-```bash
-# Build
-go build -o server ./cmd/server
-
-# Run tests
-go test ./...
-
-# Format code
-go fmt ./...
-```
-
-## Testing
-
-Unit tests are located alongside each package. Run `go test ./...` to execute all tests. The CI pipeline runs these tests on each push.
-
-## CI/CD Pipeline
-
-A GitHub Actions workflow builds the Go binary, runs tests, and on successful merges creates a Docker image and pushes it to the registry. See `.github/workflows/ci.yml` for details.
+- ✅ **Secure Storage**: Data stored in PostgreSQL with specific schemas.
+- ✅ **Password Hashing**: bcrypt used for all passwords.
+- ✅ **Multi-Tenancy**: Data strictly isolated by `org_id`.
+- ✅ **Account Lockout**: 5 failed attempts locks account for 15 mins.
+- ✅ **Input Sanitization**: SQL parameters prevent injection; Go structs validat input.
 
 ## Deployment
 
-Deploy the Docker image to any container platform (e.g., AWS ECS, GCP Cloud Run). Ensure the `JWT_SECRET` environment variable is set and mount a persistent volume for the `data/` directory if you continue using JSON storage, or configure a database connection.
+Deploy the Go binary handling standard HTTP traffic.
+Ensure `DATABASE_URL` is set in the production environment variables.

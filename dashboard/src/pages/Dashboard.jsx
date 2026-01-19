@@ -7,6 +7,7 @@ import CountUp from "../components/ui/CountUp";
 import Sparkline from "../components/ui/Sparkline";
 import Badge from "../components/ui/Badge";
 import Select from "../components/ui/Select";
+import { CURRENCY } from "../config/currency";
 import "../styles/Dashboard.css";
 
 // Enhanced Stats Card Component with animations and sparkline
@@ -221,7 +222,9 @@ export default function Dashboard() {
                         <td className="font-medium">
                           <span className="coupon-code">{coupon.code}</span>
                         </td>
-                        <td>{coupon.value} ({coupon.type})</td>
+                        <td>
+                          {coupon.type === 'Percentage' ? `${coupon.value}%` : `${CURRENCY.symbol}${coupon.value}`}
+                        </td>
                         
                         {activeView !== "expiring" && (
                           <td className="font-bold">{coupon.redemptions.toLocaleString()}</td>

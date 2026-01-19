@@ -40,20 +40,20 @@ The backend follows **Clean Architecture** principles with clear separation of c
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                    Repository Layer                             │
-│      (internal/repository/jsonrepo/*.go)                       │
-│  - Data persistence (JSON files)                               │
-│  - In-memory caching                                           │
-│  - Thread-safe operations (mutex)                              │
+│      (internal/repository/postgres/*.go)                       │
+│  - Data persistence (PostgreSQL)                               │
+│  - SQL Queries (pgx/v5)                                        │
+│  - Connection Pooling                                          │
 └─────────────────────────────────────────────────────────────────┘
                               │
                               ▼
 ┌─────────────────────────────────────────────────────────────────┐
 │                      Data Storage                               │
-│                    (data/*.json)                               │
-│  - users.json                                                  │
-│  - organizations.json                                          │
-│  - coupons.json                                                │
-│  - invitations.json                                            │
+│                 (PostgreSQL / Supabase)                         │
+│  - users table                                                 │
+│  - organizations table                                         │
+│  - coupons table                                               │
+│  - invitations table                                           │
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -77,8 +77,8 @@ Contains pure business entities with no external dependencies.
 type User struct {
     ID           string   // UUID
     Email        string
-    OrgID        string   // Links to Organization
-    OrgName      string   // Denormalized for quick access
+    OrgID        string   // FK to Organization
+    OrgName      string   // Denormalized for quick access (if needed)
     Role         string   // "owner" | "admin" | "member"
     PasswordHash string
     // Security fields
@@ -115,51 +115,47 @@ type UserRepository interface {
 
 **Benefits:**
 - Services depend on interfaces, not implementations
-- Easy to swap JSON storage for PostgreSQL/MongoDB later
+- Easy to swap specific database implementations
 - Testable with mocks
 
 ---
 
-### 3. Repository Layer (`internal/repository/jsonrepo/`)
+### 3. Repository Layer (`internal/repository/postgres/`)
 
-Implements ports using JSON file storage. Each repository:
+Implements ports using **PostgreSQL** via `pgx/v5` and `pgxpool`.
 
-1. **Loads data** from file on initialization
-2. **Caches in memory** (map by ID)
-3. **Flushes to file** on every write
-4. **Uses mutex** for thread safety
+**Features:**
+1.  **Connection Pooling:** Efficiently manages DB connections.
+2.  **Transactions:** Supports atomic operations where needed.
+3.  **SQL Migrations:** Schema managed via SQL files in `migrations/`.
+4.  **Supabase Compatibility:** Configured for Transaction Pooler (Simple Protocol).
 
 ```go
-// repository/jsonrepo/coupon_repo.go
-type FileCouponRepository struct {
-    mu       sync.RWMutex
-    filePath string
-    coupons  map[string]domain.Coupon // In-memory cache
+// repository/postgres/coupon_repo.go
+type PostgresCouponRepository struct {
+    db *pgxpool.Pool
 }
 
-func (r *FileCouponRepository) Save(coupon *domain.Coupon) error {
-    r.mu.Lock()
-    defer r.mu.Unlock()
+func (r *PostgresCouponRepository) Save(coupon *domain.Coupon) error {
+    query := `
+        INSERT INTO coupons (id, org_id, code, ...)
+        VALUES ($1, $2, $3, ...)
+        ON CONFLICT (id) DO UPDATE SET ...`
     
-    r.coupons[coupon.ID] = *coupon  // Update cache
-    return r.flush()                 // Write to file
+    _, err := r.db.Exec(context.Background(), query, coupon.ID, coupon.OrgID, ...)
+    return err
 }
 ```
 
 **Multi-Tenancy:**
-Queries filter by `OrgName` to ensure data isolation:
-```go
-func (r *FileCouponRepository) FindAll(orgName string) ([]domain.Coupon, error) {
-    r.mu.RLock()
-    defer r.mu.RUnlock()
+Queries ensure data isolation by strictly filtering by `org_id` (derived from `OrgName` or context).
 
-    var list []domain.Coupon
-    for _, c := range r.coupons {
-        if c.OrgName == orgName {  // Org-scoped filter
-            list = append(list, c)
-        }
-    }
-    return list, nil
+```go
+func (r *PostgresCouponRepository) FindAll(orgName string) ([]domain.Coupon, error) {
+    // 1. Resolve OrgID from OrgName
+    // 2. Query coupons by org_id
+    query := `SELECT ... FROM coupons WHERE org_id = $1`
+    // ...
 }
 ```
 
@@ -167,7 +163,7 @@ func (r *FileCouponRepository) FindAll(orgName string) ([]domain.Coupon, error) 
 
 ### 4. Service Layer (`internal/service/`)
 
-Contains business logic. Depends only on repository interfaces.
+Contains business logic. Depends only on `ports.Repository` interfaces.
 
 **AuthService** (`auth.go`):
 - Registration (creates org + owner user)
@@ -175,33 +171,6 @@ Contains business logic. Depends only on repository interfaces.
 - Account lockout (5 attempts → 15 min lock)
 - Email verification
 - Password reset
-
-```go
-func (s *AuthService) Login(req domain.LoginRequest) (*domain.AuthResponse, error) {
-    // 1. Find user
-    user, err := s.userRepo.FindByEmailAndOrg(req.Email, req.OrgName)
-    
-    // 2. Check lockout
-    if user.LockedUntil != nil && time.Now().Before(*user.LockedUntil) {
-        return nil, fmt.Errorf("account locked")
-    }
-    
-    // 3. Verify password
-    err = bcrypt.CompareHashAndPassword(...)
-    if err != nil {
-        user.LoginAttempts++
-        if user.LoginAttempts >= 5 {
-            user.LockedUntil = now.Add(15 * time.Minute)
-        }
-        s.userRepo.Save(user)
-        return nil, errors.New("invalid credentials")
-    }
-    
-    // 4. Generate JWT
-    token := s.generateToken(user)
-    return &domain.AuthResponse{Token: token, User: user}, nil
-}
-```
 
 **TeamService** (`team.go`):
 - Invite users (generates hashed token)
@@ -254,28 +223,6 @@ func (h *Handler) CreateCoupon(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-**Auth Middleware:**
-```go
-func (h *AuthHandler) AuthMiddleware(next http.HandlerFunc) http.HandlerFunc {
-    return func(w http.ResponseWriter, r *http.Request) {
-        // 1. Extract Bearer token
-        tokenString := r.Header.Get("Authorization")[7:]
-        
-        // 2. Verify & parse JWT
-        claims, err := h.svc.VerifyToken(tokenString)
-        
-        // 3. Inject into context
-        ctx := context.WithValue(r.Context(), "user_id", claims["user_id"])
-        ctx = context.WithValue(ctx, "org_id", claims["org_id"])
-        ctx = context.WithValue(ctx, "org_name", claims["org_name"])
-        ctx = context.WithValue(ctx, "role", claims["role"])
-        
-        // 4. Continue to handler
-        next(w, r.WithContext(ctx))
-    }
-}
-```
-
 ---
 
 ### 6. Entry Point (`cmd/server/main.go`)
@@ -284,39 +231,30 @@ Wires everything together:
 
 ```go
 func main() {
-    // 1. Initialize repositories
-    couponRepo := jsonrepo.NewFileCouponRepository("data/coupons.json")
-    userRepo := jsonrepo.NewFileUserRepository("data/users.json")
-    orgRepo := jsonrepo.NewFileOrganizationRepository("data/organizations.json")
-    inviteRepo := jsonrepo.NewFileInvitationRepository("data/invitations.json")
+    // 1. Initialize Database
+    dbPool, err := db.NewPG(os.Getenv("DATABASE_URL"))
+    if err != nil {
+        log.Fatal(err)
+    }
+    defer dbPool.Close()
 
-    // 2. Initialize services
+    // 2. Initialize Repositories (Postgres)
+    orgRepo := postgres.NewOrganizationRepository(dbPool)
+    userRepo := postgres.NewUserRepository(dbPool)
+    couponRepo := postgres.NewCouponRepository(dbPool, orgRepo)
+    inviteRepo := postgres.NewInvitationRepository(dbPool, orgRepo)
+
+    // 3. Initialize Services
     computeSvc := service.NewComputationService(couponRepo)
     authSvc := service.NewAuthService(userRepo, orgRepo)
     teamSvc := service.NewTeamService(userRepo, orgRepo, inviteRepo)
 
-    // 3. Initialize handlers
+    // 4. Initialize Handlers
     h := handler.NewHandler(computeSvc)
     authH := handler.NewAuthHandler(authSvc)
-    teamH := handler.NewTeamHandler(teamSvc, authSvc)
+    // ...
 
-    // 4. Register routes
-    mux := http.NewServeMux()
-    
-    // Public
-    mux.HandleFunc("POST /api/v1/public/compute", h.ComputeDiscount)
-    
-    // Auth
-    mux.HandleFunc("POST /api/v1/auth/register", authH.Register)
-    mux.HandleFunc("POST /api/v1/auth/login", authH.Login)
-    
-    // Protected (with middleware)
-    mux.HandleFunc("GET /api/v1/dashboard/coupons", 
-        authH.AuthMiddleware(h.GetAllCoupons))
-    mux.HandleFunc("POST /api/v1/team/invite", 
-        authH.AuthMiddleware(teamH.InviteUser))
-
-    // 5. Start server with CORS
+    // 5. Start Server
     http.ListenAndServe(":8081", h.EnableCORS(mux))
 }
 ```
@@ -348,8 +286,8 @@ func main() {
    - Call repository.Save()
    
 5. [Repository] Save()
-   - Add to in-memory map
-   - Write entire map to coupons.json
+   - Execute SQL INSERT via pgxpool
+   - Handle database constraints (e.g., unique code per org)
    
 6. [Handler] Return 201 Created + coupon JSON
 ```
@@ -368,25 +306,13 @@ func hashToken(token string) string {
 }
 ```
 
-The plain token is sent to user (via email). Database stores only the hash.
-
 ### Password Storage
-bcrypt with default cost (10 rounds):
-
-```go
-hashedBytes, _ := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-```
+bcrypt with default cost (10 rounds).
 
 ### Account Lockout
-```go
-const MaxLoginAttempts = 5
-const LockoutDuration = 15 * time.Minute
-
-if user.LoginAttempts >= MaxLoginAttempts {
-    lockUntil := time.Now().Add(LockoutDuration)
-    user.LockedUntil = &lockUntil
-}
-```
+- **LoginAttempts**: Tracked in `users` table.
+- **LockedUntil**: Timestamp in `users` table.
+- **Logic**: 5 failed attempts locks account for 15 minutes.
 
 ---
 
@@ -394,19 +320,17 @@ if user.LoginAttempts >= MaxLoginAttempts {
 
 Each organization is isolated:
 
-1. **Registration** → Creates Organization + Owner User
-2. **Login** → Requires email + org_name + password
-3. **JWT** → Contains org_id, org_name
-4. **Queries** → Always filter by org_name
+1.  **Database**: All tables (`users`, `coupons`, etc.) have an `org_id` column.
+2.  **Foreign Keys**: Enforce relationship to `organizations` table.
+3.  **App Logic**: All queries filter by `org_id` derived from the logged-in user's token.
 
 ```
-Organization A (BurgerKing)
+Organization A (BurgerKing) [UUID: 123...]
 ├── Owner: alice@burgerking.com
-├── Admin: bob@burgerking.com
-├── Coupons: BURGER10, MEAL20
+├── Coupons: BURGER10
 └── Cannot see Organization B's data
 
-Organization B (PizzaHut)
+Organization B (PizzaHut) [UUID: 456...]
 ├── Owner: carol@pizzahut.com
 ├── Coupons: PIZZA15
 └── Cannot see Organization A's data
@@ -414,25 +338,15 @@ Organization B (PizzaHut)
 
 ---
 
-## Role-Based Access Control
+## Database Schema
 
-| Permission | Owner | Admin | Member |
-|------------|-------|-------|--------|
-| Create coupons | ✅ | ✅ | ✅ |
-| Delete coupons | ✅ | ✅ | ❌ |
-| Invite users | ✅ | ✅ | ❌ |
-| Remove users | ✅ | ✅ | ❌ |
-| Change roles | ✅ | ❌ | ❌ |
-| Delete org | ✅ | ❌ | ❌ |
+Refer to `docs/DATABASE_ARCHITECTURE.md` for full schema details.
 
-Checked in handlers:
-```go
-role := r.Context().Value("role").(string)
-if role != "owner" && role != "admin" {
-    http.Error(w, "Forbidden", http.StatusForbidden)
-    return
-}
-```
+**Key Tables:**
+- `organizations`: Tenant root.
+- `users`: Members of organizations.
+- `coupons`: Discount rules.
+- `invitations`: Pending team members.
 
 ---
 
@@ -458,22 +372,5 @@ jobs:
         run: go test ./...
       - name: Build binary
         run: go build -o server ./cmd/server
-      - name: Build Docker image
-        run: |
-          docker build -t coupon-saas-backend:${{ github.sha }} .
-      - name: Push Docker image
-        if: github.ref == 'refs/heads/main'
-        run: |
-          echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
-          docker push coupon-saas-backend:${{ github.sha }}
 ```
-
-## Testing Strategy
-
-- **Unit Tests**: Go tests for each package (`go test ./...`).
-- **Integration Tests**: Spin up the server with an in‑memory SQLite DB (or mock JSON repo) and run end‑to‑end API tests using **Postman/Newman** or **Go's net/http/httptest**.
-- **Coverage**: Enforce a minimum of 80 % code coverage; fail the CI if below.
-- **Static Analysis**: Run `golint` and `go vet` as part of the workflow.
-
----
 

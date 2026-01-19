@@ -114,6 +114,8 @@ func (s *AuthService) Login(req domain.LoginRequest) (*domain.AuthResponse, erro
 	// 1. Find User
 	user, err := s.userRepo.FindByEmailAndOrg(req.Email, req.OrgName)
 	if err != nil {
+		// Log the actual error for debugging
+		slog.Error("Login: User lookup failed", "email", req.Email, "error", err)
 		return nil, errors.New("invalid credentials")
 	}
 

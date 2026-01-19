@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { Search, Plus, Filter, MoreHorizontal, Trash2, Edit, PauseCircle, PlayCircle } from "lucide-react";
+import { Search, Plus, Filter, MoreHorizontal, Trash2, Edit, PauseCircle, PlayCircle, Eye } from "lucide-react";
 import { Link } from "react-router-dom";
 import useCouponStore from "../store/useCouponStore";
 import { TableRowSkeleton } from "../components/ui/Skeleton";
@@ -7,6 +7,7 @@ import CouponCardMobile from "../components/ui/CouponCardMobile";
 import Badge from "../components/ui/Badge";
 import Button from "../components/ui/Button";
 import Select from "../components/ui/Select";
+import { CURRENCY } from "../config/currency";
 import "../styles/Coupons.css";
 
 export default function Coupons() {
@@ -50,6 +51,7 @@ export default function Coupons() {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("All");
+  const [filterVisibility, setFilterVisibility] = useState("All");
   const [activeActionId, setActiveActionId] = useState(null);
   const [deleteId, setDeleteId] = useState(null);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0 });
@@ -58,10 +60,11 @@ export default function Coupons() {
   const filteredCoupons = useMemo(() => {
     return coupons.filter(coupon => {
       const matchesSearch = coupon.code.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesFilter = filterStatus === "All" || coupon.status === filterStatus;
-      return matchesSearch && matchesFilter;
+      const matchesStatus = filterStatus === "All" || coupon.status === filterStatus;
+      const matchesVisibility = filterVisibility === "All" || (filterVisibility === "Public" ? coupon.visible : !coupon.visible);
+      return matchesSearch && matchesStatus && matchesVisibility;
     });
-  }, [coupons, searchTerm, filterStatus]);
+  }, [coupons, searchTerm, filterStatus, filterVisibility]);
 
   // Actions
   const handleToggleStatus = (id) => {
@@ -131,6 +134,17 @@ export default function Coupons() {
             onChange={setFilterStatus}
             icon={Filter}
           />
+
+          <Select 
+            options={[
+              { value: "All", label: "All Visibility" },
+              { value: "Public", label: "Public" },
+              { value: "Hidden", label: "Hidden" }
+            ]}
+            value={filterVisibility}
+            onChange={setFilterVisibility}
+            icon={Eye}
+          />
           
           <Button 
             variant="primary" 
@@ -169,8 +183,8 @@ export default function Coupons() {
                     <span className="coupon-code">{coupon.code}</span>
                     <div className="coupon-type">{coupon.type}</div>
                   </td>
-                  <td className="font-medium">{coupon.value}{coupon.type === 'Percentage' ? '%' : '$'}</td>
-                  <td className="text-muted">${coupon.minOrder}</td>
+                  <td className="font-medium">{coupon.value}{coupon.type === 'Percentage' ? '%' : CURRENCY.symbol}</td>
+                  <td className="text-muted">{CURRENCY.symbol}{coupon.minOrder}</td>
                   <td>
                     <Badge status={coupon.visible ? "Public" : "Influencer"} />
                   </td>
