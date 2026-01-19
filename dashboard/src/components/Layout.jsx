@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
-import { Copy, Home, LogOut, Settings, LayoutDashboard, ChevronLeft, Moon, Sun, Users, Menu } from "lucide-react";
-import { Link, useLocation } from "react-router-dom";
+import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
+import { TicketPercent, Home, LogOut, Settings, LayoutDashboard, ChevronLeft, Moon, Sun, Users, Menu } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import "../styles/Layout.css";
 import useThemeStore from "../store/useThemeStore";
@@ -53,7 +52,7 @@ export default function Layout() {
       <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''} ${isMobile ? 'mobile' : ''}`}>
         <div className="sidebar-header">
           <Link to="/" className="brand">
-            <Copy size={28} />
+            <TicketPercent size={28} />
             <AnimatePresence>
               {!isCollapsed && (
                 <motion.span

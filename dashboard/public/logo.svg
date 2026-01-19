@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- 
+    Maximized Width Ticket Shape 
+    - Width: 512px (Full Viewbox)
+    - Height: 352px (Vertically centered)
+    - Color: Solid Black (#000000)
+  -->
+  <path d="M 448 80 
+           H 64 
+           A 64 64 0 0 0 0 144 
+           V 208 
+           A 48 48 0 0 1 0 304 
+           V 368 
+           A 64 64 0 0 0 64 432 
+           H 448 
+           A 64 64 0 0 0 512 368 
+           V 304 
+           A 48 48 0 0 1 512 208 
+           V 144 
+           A 64 64 0 0 0 448 80 
+           z" 
+        fill="#000000" />
+
+  <!-- Bold Percent Symbol 
+       - Widened to match new aspect ratio
+       - White (#ffffff)
+  -->
+  <g fill="#ffffff">
+    <!-- Top Left Circle (Shifted Left) -->
+    <circle cx="150" cy="196" r="46" />
+    <!-- Bottom Right Circle (Shifted Right) -->
+    <circle cx="362" cy="316" r="46" />
+    <!-- Thick Slash (Stretched) -->
+    <path d="M370,140 l-228,232 a20,20 0 0,0 32,24 l228,-232 a20,20 0 0,0 -32,-24 z" />
+  </g>
+</svg>
